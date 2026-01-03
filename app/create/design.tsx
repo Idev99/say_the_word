@@ -14,6 +14,8 @@ export default function CreatorDesignStep() {
 
     const currentLayout = creatorRoundLayouts[activeRound] || Array(8).fill(null);
 
+    const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+
     const handleSlotPress = (index: number) => {
         setSelectedSlot(index);
         setModalVisible(true);
@@ -28,43 +30,67 @@ export default function CreatorDesignStep() {
     };
 
     const handleFinish = () => {
-        // Validate Round 1
-        const r1 = creatorRoundLayouts[1];
-        if (r1.some(i => i === null)) {
-            Alert.alert('Incomplete', 'Please fill all slots in Round 1.');
+        // Check for ANY empty slots across all rounds
+        const hasEmptySlots = [1, 2, 3, 4, 5].some(r => {
+            const layout = creatorRoundLayouts[r] || Array(8).fill(null);
+            return layout.some(slot => slot === null);
+        });
+
+        if (hasEmptySlots) {
+            // Show custom confirmation modal
+            setConfirmModalVisible(true);
             return;
         }
 
-        Alert.alert('Success', 'Challenge Created!', [
-            {
-                text: 'Play Now', onPress: () => {
-                    // Load custom level and start
-                    const { loadCustomLevel } = useGameStore.getState();
-                    loadCustomLevel();
-                    router.push('/game/custom');
-                }
-            }
-        ]);
+        // If no empty slots, proceed directly
+        proceedToGame();
+    };
+
+    const proceedToGame = () => {
+        const { loadCustomLevel } = useGameStore.getState();
+        loadCustomLevel();
+        router.push('/game/custom');
+    };
+
+    const handleConfirmFill = () => {
+        const { fillRandomSlots } = useGameStore.getState();
+        fillRandomSlots();
+        setConfirmModalVisible(false);
+        proceedToGame();
+    };
+
+    const handleBack = () => {
+        router.back();
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Design Your Rounds</Text>
+            {/* Header with Back Button */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>←</Text>
+                </TouchableOpacity>
+                <Text style={styles.title}>Design Your Rounds</Text>
+                <View style={{ width: 40 }} />
+            </View>
+
             <View style={styles.steps}><Text style={styles.step}>1 — 2 — </Text><Text style={styles.stepActive}>3</Text></View>
 
             <Text style={styles.subtitle}>Tap each slot to choose an image.</Text>
 
-            {/* Tabs */}
-            <View style={styles.tabs}>
-                {ROUNDS.map(r => (
-                    <TouchableOpacity
-                        key={r}
-                        onPress={() => setActiveRound(r)}
-                        style={[styles.tab, activeRound === r && styles.tabActive]}
-                    >
-                        <Text style={[styles.tabText, activeRound === r && styles.tabTextActive]}>Round {r}</Text>
-                    </TouchableOpacity>
-                ))}
+            {/* Centered Numbered Tabs */}
+            <View style={styles.tabsContainer}>
+                <View style={styles.tabs}>
+                    {ROUNDS.map(r => (
+                        <TouchableOpacity
+                            key={r}
+                            onPress={() => setActiveRound(r)}
+                            style={[styles.tab, activeRound === r && styles.tabActive]}
+                        >
+                            <Text style={[styles.tabText, activeRound === r && styles.tabTextActive]}>{r}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </View>
 
             {/* Grid */}
@@ -102,6 +128,27 @@ export default function CreatorDesignStep() {
                     </View>
                 </View>
             </Modal>
+            {/* Confirmation Modal */}
+            <Modal visible={confirmModalVisible} animationType="fade" transparent>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.confirmModalContent}>
+                        <Text style={styles.modalTitle}>Incomplete Rounds</Text>
+                        <Text style={styles.confirmMessage}>
+                            Some slots are empty. Do you want to fill them randomly with your uploaded images?
+                        </Text>
+
+                        <View style={styles.confirmButtons}>
+                            <TouchableOpacity onPress={() => setConfirmModalVisible(false)} style={[styles.confirmButton, styles.cancelButton]}>
+                                <Text style={styles.cancelButtonText}>No, Let me Finish</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={handleConfirmFill} style={[styles.confirmButton, styles.okButton]}>
+                                <Text style={styles.okButtonText}>Yes, Auto-Fill</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -113,10 +160,23 @@ const styles = StyleSheet.create({
         backgroundColor: '#FAF9F6',
         alignItems: 'center',
     },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: 10,
+    },
+    backButton: {
+        padding: 10,
+    },
+    backButtonText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 5,
     },
     steps: {
         flexDirection: 'row',
@@ -135,18 +195,24 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         color: '#666',
     },
+    tabsContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+        width: '100%',
+    },
     tabs: {
         flexDirection: 'row',
-        marginBottom: 20,
-        gap: 10,
+        gap: 15,
     },
     tab: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderWidth: 1,
-        borderColor: '#ddd',
+        width: 40,
+        height: 40,
         borderRadius: 20,
         backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ddd',
     },
     tabActive: {
         backgroundColor: '#FFEB3B', // Yellow
@@ -155,10 +221,12 @@ const styles = StyleSheet.create({
     },
     tabText: {
         color: '#666',
+        fontSize: 16,
     },
     tabTextActive: {
         color: 'black',
         fontWeight: 'bold',
+        fontSize: 18,
     },
     grid: {
         flexDirection: 'row',
@@ -244,6 +312,55 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     closeText: {
+        fontWeight: 'bold',
+    },
+    // Confirm Modal Styles
+    confirmModalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 25,
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        width: '90%',
+        maxWidth: 400,
+    },
+    confirmMessage: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 20,
+        lineHeight: 22,
+    },
+    confirmButtons: {
+        flexDirection: 'row',
+        gap: 15,
+        width: '100%',
+    },
+    confirmButton: {
+        flex: 1,
+        padding: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        borderWidth: 1,
+    },
+    cancelButton: {
+        backgroundColor: 'white',
+        borderColor: '#ccc',
+    },
+    okButton: {
+        backgroundColor: '#FFEB3B',
+        borderColor: 'black',
+    },
+    cancelButtonText: {
+        color: '#666',
+        fontWeight: 'bold',
+    },
+    okButtonText: {
+        color: 'black',
         fontWeight: 'bold',
     },
 });

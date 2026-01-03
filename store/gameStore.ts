@@ -38,6 +38,7 @@ interface GameStore {
   removeCreatorImage: (index: number) => void;
   setCreatorMode: (mode: 'RANDOM' | 'CUSTOM') => void;
   setCreatorRoundSlot: (round: number, slotIndex: number, imageUri: string) => void;
+  fillRandomSlots: () => void;
 
   resetCreator: () => void;
   
@@ -96,6 +97,22 @@ export const useGameStore = create<GameStore>((set) => ({
       const currentRoundLayout = [...(state.creatorRoundLayouts[round] || Array(8).fill(null))];
       currentRoundLayout[slot] = uri;
       return { creatorRoundLayouts: { ...state.creatorRoundLayouts, [round]: currentRoundLayout } };
+      return { creatorRoundLayouts: { ...state.creatorRoundLayouts, [round]: currentRoundLayout } };
+  }),
+  fillRandomSlots: () => set((state) => {
+      const newLayouts = { ...state.creatorRoundLayouts };
+      const images = state.creatorImages;
+      if (images.length === 0) return {}; // No images to fill with
+
+      [1, 2, 3, 4, 5].forEach(round => {
+          const layout = newLayouts[round] || Array(8).fill(null);
+          const filledLayout = layout.map(slot => {
+              if (slot) return slot;
+              return images[Math.floor(Math.random() * images.length)];
+          });
+          newLayouts[round] = filledLayout;
+      });
+      return { creatorRoundLayouts: newLayouts };
   }),
   resetCreator: () => set({ creatorImages: [], creatorMode: 'RANDOM', creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) } }),
 

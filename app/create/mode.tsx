@@ -20,6 +20,12 @@ export default function CreatorStep2() {
 
     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>← Back</Text>
+                </TouchableOpacity>
+            </View>
+
             <Text style={styles.title}>Choose Mode</Text>
             <View style={styles.steps}><Text style={styles.step}>1 — </Text><Text style={styles.stepActive}>2</Text><Text style={styles.step}> — 3</Text></View>
 
@@ -48,6 +54,19 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#FAF9F6',
         alignItems: 'center',
+    },
+    header: {
+        width: '100%',
+        alignItems: 'flex-start',
+        marginBottom: 10,
+    },
+    backButton: {
+        padding: 10,
+    },
+    backButtonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#666',
     },
     title: {
         fontSize: 24,
