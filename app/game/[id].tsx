@@ -89,7 +89,7 @@ export default function GameScreen() {
 
             <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollView}>
                 <View style={styles.gameArea}>
-                    <GridSystem level={currentLevel} activeBeat={currentBeat} />
+                    <GridSystem key={currentRound} level={currentLevel} activeBeat={currentBeat} />
                 </View>
 
                 {!isPlaying && (

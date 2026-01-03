@@ -16,6 +16,7 @@ interface GameStore {
   currentBeat: number; // 0 to TotalSteps
   bpm: number;
   isPlaying: boolean;
+  isRoundIntro: boolean;
 
   // Actions
   setGameState: (state: GameState) => void;
@@ -23,6 +24,8 @@ interface GameStore {
   startRound: () => void;
   nextRound: () => void;
   setBeat: (beat: number) => void;
+
+  endRoundIntro: () => void;
   stopGame: () => void;
 
   // Creator State
@@ -48,11 +51,14 @@ export const useGameStore = create<GameStore>((set) => ({
   currentRound: 1,
   currentBeat: -1,
   bpm: 100, // Default BPM
+
   isPlaying: false,
+  isRoundIntro: false,
 
   setGameState: (state) => set({ gameState: state }),
-  loadLevel: (level) => set({ currentLevel: level, currentRound: 1, currentBeat: -1 }),
-  startRound: () => set({ isPlaying: true, currentBeat: -1 }),
+  loadLevel: (level) => set({ currentLevel: level, currentRound: 1, currentBeat: -1, isRoundIntro: false }),
+  startRound: () => set({ isPlaying: true, isRoundIntro: true, currentBeat: -1 }),
+  endRoundIntro: () => set({ isRoundIntro: false }),
   nextRound: () => set((state) => {
       const nextR = state.currentRound + 1;
       let nextImages = state.currentLevel?.images || [];
@@ -71,6 +77,7 @@ export const useGameStore = create<GameStore>((set) => ({
       return {
           currentRound: nextR,
           currentBeat: -1,
+          isRoundIntro: true, // Enable intro for the next round
           currentLevel: state.currentLevel ? { ...state.currentLevel, images: nextImages } : null
       };
   }),

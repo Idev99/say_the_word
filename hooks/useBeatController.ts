@@ -8,7 +8,7 @@ const BEAT_SOUND = { uri: 'https://actions.google.com/sounds/v1/alarms/beep_shor
 
 export const useBeatController = () => {
   const soundRef = useRef<Audio.Sound | null>(null);
-  const { isPlaying, bpm, setBeat } = useGameStore();
+  const { isPlaying, bpm, setBeat, isRoundIntro } = useGameStore();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load sound
@@ -39,7 +39,8 @@ export const useBeatController = () => {
   }, []);
 
   useEffect(() => {
-    if (isPlaying) {
+    // Only start beats if playing AND not in intro/presentation mode
+    if (isPlaying && !isRoundIntro) {
       const beatInterval = 60000 / bpm;
       let beatCount = 0;
       
@@ -57,7 +58,7 @@ export const useBeatController = () => {
         if (beatCount >= totalRoundBeats) {
              const { nextRound, currentLevel, currentRound, stopGame } = useGameStore.getState();
              
-             if (currentRound >= currentLevel.rounds) {
+             if (currentLevel && currentRound >= currentLevel.rounds) {
                  // Game Over
                  clearInterval(intervalRef.current!);
                  stopGame();
@@ -92,5 +93,5 @@ export const useBeatController = () => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPlaying, bpm, playBeat, setBeat]);
+  }, [isPlaying, bpm, playBeat, setBeat, isRoundIntro]);
 };
