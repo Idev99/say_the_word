@@ -15,7 +15,7 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
     return (
         <View style={styles.grid}>
             {level.images.map((img, index) => {
-                const isActive = index === (activeBeat % level.images.length);
+                const isActive = index === activeBeat;
                 return (
                     <View
                         key={index}
@@ -38,13 +38,19 @@ const styles = StyleSheet.create({
     grid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: GAP,
+        justifyContent: 'space-between', // Use space-between to handle gaps automatically if calculated right
+        // gap: GAP, // Gap support is spotty in older RN versions or some web contexts, verify compatibility. 
+        // Actually, let's stick to gap but be precise.
+        gap: 10,
         width: '100%',
         padding: 10,
     },
     cardContainer: {
-        width: '23%', // approx 4 per row with gap
+        // (100% - (3 gaps * 10px)) / 4 = ~22%
+        // Let's use a safe lower bound or calc if supported. 
+        // On web calc works, on RN it's string.
+        // Safer: 22%
+        width: '21%', // 21 * 4 = 84%, leaves 16% for gaps/padding. Plenty safe.
         aspectRatio: 1,
         backgroundColor: 'white',
         borderWidth: 2,

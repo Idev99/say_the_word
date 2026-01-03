@@ -35,7 +35,7 @@ interface GameStore {
   removeCreatorImage: (index: number) => void;
   setCreatorMode: (mode: 'RANDOM' | 'CUSTOM') => void;
   setCreatorRoundSlot: (round: number, slotIndex: number, imageUri: string) => void;
-  setCreatorRoundSlot: (round: number, slotIndex: number, imageUri: string) => void;
+
   resetCreator: () => void;
   
   // Custom Game Start
@@ -53,7 +53,27 @@ export const useGameStore = create<GameStore>((set) => ({
   setGameState: (state) => set({ gameState: state }),
   loadLevel: (level) => set({ currentLevel: level, currentRound: 1, currentBeat: -1 }),
   startRound: () => set({ isPlaying: true, currentBeat: -1 }),
-  nextRound: () => set((state) => ({ currentRound: state.currentRound + 1, currentBeat: -1 })),
+  nextRound: () => set((state) => {
+      const nextR = state.currentRound + 1;
+      let nextImages = state.currentLevel?.images || [];
+
+      // If Custom Mode, load specific round images
+      if (state.creatorMode === 'CUSTOM' && state.creatorRoundLayouts) {
+          const roundLayout = state.creatorRoundLayouts[nextR];
+          if (roundLayout) {
+             nextImages = roundLayout.map(img => img || 'https://via.placeholder.com/150') as string[];
+          }
+      } else if (state.creatorMode === 'RANDOM' && state.creatorImages.length > 0) {
+          // Regenerate random layout for next round
+          nextImages = Array(8).fill(null).map(() => state.creatorImages[Math.floor(Math.random() * state.creatorImages.length)]);
+      }
+
+      return {
+          currentRound: nextR,
+          currentBeat: -1,
+          currentLevel: state.currentLevel ? { ...state.currentLevel, images: nextImages } : null
+      };
+  }),
   setBeat: (beat) => set({ currentBeat: beat }),
   stopGame: () => set({ isPlaying: false, gameState: 'MENU' }),
 

@@ -49,8 +49,39 @@ export const useBeatController = () => {
 
       intervalRef.current = setInterval(() => {
         beatCount++;
-        playBeat();
-        setBeat(beatCount);
+        
+        // Check end of round sequence (8 items, no pause)
+        const itemsPerRound = 8;
+        const totalRoundBeats = itemsPerRound; 
+
+        if (beatCount >= totalRoundBeats) {
+             const { nextRound, currentLevel, currentRound, stopGame } = useGameStore.getState();
+             
+             if (currentRound >= currentLevel.rounds) {
+                 // Game Over
+                 clearInterval(intervalRef.current!);
+                 stopGame();
+                 // Should navigate to result screen realistically
+             } else {
+                 // Next Round
+                 nextRound();
+                 beatCount = -1; // Reset beat count for next round (-1 because we increment immediately next loop? No, we need to sync)
+                 // actually nextRound resets beat to -1 in store.
+                 // But this local `beatCount` needs reset too.
+                 // And we want the next beat (beat 0) to play immediately? 
+                 // Or wait one interval? 
+                 // If we reset to -1, next tick (interval) it becomes 0 and we playBeat. Correct.
+                 beatCount = -1; 
+             }
+        } else {
+            // Normal beat
+            if (beatCount < itemsPerRound) {
+                playBeat();
+            }
+            // If beatCount >= 8 (the pause beats), we don't play sound? Or maybe a different sound?
+            // Site has a different "tock" or silence. Let's silence for now.
+            setBeat(beatCount);
+        }
       }, beatInterval);
     } else {
       if (intervalRef.current) {
