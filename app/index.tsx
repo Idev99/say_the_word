@@ -13,7 +13,7 @@ export default function HomeScreen() {
             <Text style={styles.title}>{t.title}</Text>
 
             <View style={styles.menu}>
-                <TouchableOpacity onPress={() => router.push('/game/numbers')} style={styles.menuButton}>
+                <TouchableOpacity onPress={() => router.push('/challenges')} style={styles.menuButton}>
                     <Text style={styles.menuText}>{t.playFeatured}</Text>
                 </TouchableOpacity>
 

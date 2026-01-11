@@ -32,6 +32,16 @@ export default function CreatorStep1() {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity
+                onPress={() => router.push('/challenges')}
+                style={styles.homeButton}
+            >
+                <Image
+                    source={require('../../assets/icons/home.png')}
+                    style={styles.homeIcon}
+                />
+            </TouchableOpacity>
+
             <Text style={styles.title}>{t.step1Title}</Text>
             <View style={styles.steps}><Text style={styles.stepActive}>1</Text><Text style={styles.step}> — 2 — 3</Text></View>
 
@@ -152,5 +162,28 @@ const styles = StyleSheet.create({
     nextText: {
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    homeButton: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        backgroundColor: 'white',
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 25,
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        zIndex: 100,
+    },
+    homeIcon: {
+        width: 24,
+        height: 24,
+        resizeMode: 'contain',
     },
 });

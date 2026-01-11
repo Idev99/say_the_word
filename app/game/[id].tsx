@@ -10,19 +10,64 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 
 // Mock Data for "Featured" levels
 const MOCK_LEVELS: Record<string, LevelData> = {
+    'bird': {
+        id: 'bird',
+        name: 'Bird Butter Bubble',
+        rounds: 5,
+        images: [
+            require('../../assets/images/bird.png'),
+            require('../../assets/images/butter.png'),
+            require('../../assets/images/bubble.png'),
+            require('../../assets/images/baby.png'),
+            require('../../assets/images/bird.png'),
+            require('../../assets/images/butter.png'),
+            require('../../assets/images/bubble.png'),
+            require('../../assets/images/baby.png'),
+        ]
+    },
     'numbers': {
         id: 'numbers',
         name: 'Numbers 1-8',
         rounds: 5,
         images: [
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=1',
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=2',
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=3',
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=4',
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=5',
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=6',
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=7',
-            'https://via.placeholder.com/150/FF0000/FFFFFF?text=8',
+            require('../../assets/images/1.png'),
+            require('../../assets/images/2.png'),
+            require('../../assets/images/3.png'),
+            require('../../assets/images/4.png'),
+            require('../../assets/images/1.png'),
+            require('../../assets/images/2.png'),
+            require('../../assets/images/3.png'),
+            require('../../assets/images/4.png'),
+        ]
+    },
+    'colors': {
+        id: 'colors',
+        name: 'Colors',
+        rounds: 5,
+        images: [
+            require('../../assets/images/red.png'),
+            require('../../assets/images/blue.png'),
+            require('../../assets/images/green.png'),
+            require('../../assets/images/yellow.png'),
+            require('../../assets/images/red.png'),
+            require('../../assets/images/blue.png'),
+            require('../../assets/images/green.png'),
+            require('../../assets/images/yellow.png'),
+        ]
+    },
+    'country': {
+        id: 'country',
+        name: 'Country Road C-Pack',
+        rounds: 5,
+        images: [
+            require('../../assets/images/russia.png'),
+            require('../../assets/images/ukraine.png'),
+            require('../../assets/images/usa.png'),
+            require('../../assets/images/china.png'),
+            require('../../assets/images/russia.png'),
+            require('../../assets/images/ukraine.png'),
+            require('../../assets/images/usa.png'),
+            require('../../assets/images/china.png'),
         ]
     }
 };

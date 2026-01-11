@@ -22,6 +22,16 @@ export default function CreatorStep2() {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity
+                onPress={() => router.push('/challenges')}
+                style={styles.homeButton}
+            >
+                <Image
+                    source={require('../../assets/icons/home.png')}
+                    style={styles.homeIcon}
+                />
+            </TouchableOpacity>
+
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Text style={styles.backButtonText}>{t.back}</Text>

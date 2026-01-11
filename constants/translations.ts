@@ -4,10 +4,29 @@ export const translations = {
     EN: {
         home: {
             title: "Say The Word\nOn Beat",
-            playFeatured: "PLAY FEATURED",
+            playFeatured: "JOIN A CHALLENGE!",
             createChallenge: "CREATE CHALLENGE",
         },
+        challenges: {
+            tabs: {
+                featured: "FEATURED",
+                community: "COMMUNITY",
+                videos: "VIDEOS",
+                create: "CREATE",
+                blog: "BLOG",
+            },
+            createBanner: "Create Your Own Challenge",
+            featuredTitle: "FEATURED CHALLENGES",
+            play: "PLAY",
+            list: {
+                bird: "Bird Butter Bubble",
+                numbers: "Numbers",
+                colors: "Colors",
+                country: "Country Road C-Pack",
+            }
+        },
         creator: {
+            // ... (rest of translations)
             step1Title: "Create Challenge",
             step1Subtitle: "Upload Your Images (Min 3)",
             addImage: "+ Add Image",
@@ -47,8 +66,26 @@ export const translations = {
     FR: {
         home: {
             title: "Dis Le Mot\nEn Rythme",
-            playFeatured: "JOUER LA SÉLECTION",
+            playFeatured: "REJOINS UN DÉFI !",
             createChallenge: "CRÉER UN DÉFI",
+        },
+        challenges: {
+            tabs: {
+                featured: "SÉQUENCES",
+                community: "COMMUNAUTÉ",
+                videos: "VIDÉOS",
+                create: "CRÉER",
+                blog: "BLOG",
+            },
+            createBanner: "Crée ton propre défi",
+            featuredTitle: "DÉFIS À LA UNE",
+            play: "JOUER",
+            list: {
+                bird: "Bird Butter Bubble",
+                numbers: "Chiffres",
+                colors: "Couleurs",
+                country: "Country Road C-Pack",
+            }
         },
         creator: {
             step1Title: "Créer un Défi",
@@ -90,8 +127,26 @@ export const translations = {
     ES: {
         home: {
             title: "Di La Palabra\nAl Ritmo",
-            playFeatured: "JUGAR DESTACADO",
+            playFeatured: "¡ÚNETE A UN DESAFÍO!",
             createChallenge: "CREAR DESAFÍO",
+        },
+        challenges: {
+            tabs: {
+                featured: "DESTACADO",
+                community: "COMUNIDAD",
+                videos: "VIDEOS",
+                create: "CREAR",
+                blog: "BLOG",
+            },
+            createBanner: "Crea tu propio desafío",
+            featuredTitle: "DESAFÍOS DESTACADOS",
+            play: "JUGAR",
+            list: {
+                bird: "Bird Butter Bubble",
+                numbers: "Números",
+                colors: "Colores",
+                country: "Country Road C-Pack",
+            }
         },
         creator: {
             step1Title: "Crear Desafío",
