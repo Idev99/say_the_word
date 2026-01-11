@@ -68,23 +68,27 @@ export default function CreatorDesignStep() {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                onPress={() => router.push('/challenges')}
-                style={styles.homeButton}
-            >
-                <Image
-                    source={require('../../assets/icons/home.png')}
-                    style={styles.homeIcon}
-                />
-            </TouchableOpacity>
-            {/* Header with Back Button */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>←</Text>
+            {/* Navigation Header */}
+            <View style={styles.navHeader}>
+                <TouchableOpacity
+                    onPress={() => router.push('/challenges')}
+                    style={styles.homeButton}
+                >
+                    <Image
+                        source={require('../../assets/icons/home.png')}
+                        style={styles.homeIcon}
+                    />
                 </TouchableOpacity>
-                <Text style={styles.title}>{t.designTitle}</Text>
-                <View style={{ width: 40 }} />
+
+                <TouchableOpacity
+                    onPress={handleBack}
+                    style={styles.backButtonStyled}
+                >
+                    <Text style={styles.backButtonTextStyled}>{t.back}</Text>
+                </TouchableOpacity>
             </View>
+
+            <Text style={styles.title}>{t.designTitle}</Text>
 
             <View style={styles.steps}><Text style={styles.step}>1 — 2 — </Text><Text style={styles.stepActive}>3</Text></View>
 
@@ -171,19 +175,31 @@ const styles = StyleSheet.create({
         padding: 20,
         alignItems: 'center',
     },
-    header: {
+    navHeader: {
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginBottom: 10,
+        paddingTop: 10,
+        marginBottom: 20,
+        gap: 15,
     },
-    backButton: {
-        padding: 10,
+    backButtonStyled: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 8,
+        backgroundColor: 'white',
+        shadowColor: '#000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 3,
     },
-    backButtonText: {
-        fontSize: 24,
+    backButtonTextStyled: {
+        fontSize: 16,
         fontWeight: 'bold',
+        color: 'black',
     },
     title: {
         fontSize: 24,
@@ -244,9 +260,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     homeButton: {
-        position: 'absolute',
-        top: 20,
-        left: 20,
         backgroundColor: 'white',
         borderWidth: 2,
         borderColor: 'black',
@@ -259,7 +272,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 3, height: 3 },
         shadowOpacity: 1,
         shadowRadius: 0,
-        zIndex: 100,
     },
     homeIcon: {
         width: 24,
