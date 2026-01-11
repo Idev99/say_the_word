@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'black',
         borderRadius: 25,
-        paddingHorizontal: 10,
+        paddingHorizontal: 0,
         paddingVertical: 6,
         minWidth: 60,
         shadowColor: '#000',

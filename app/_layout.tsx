@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
         top: 20,
         right: 20,
         zIndex: 100,
-        padding: 5, // Extra room for touch/visual breathing room
+        padding: 0,
     },
 });

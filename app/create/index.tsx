@@ -135,6 +135,8 @@ const styles = StyleSheet.create({
     addText: {
         color: '#4CAF50',
         fontWeight: 'bold',
+        textAlign: 'center',
+        paddingHorizontal: 5,
     },
     nextButton: {
         position: 'absolute',
