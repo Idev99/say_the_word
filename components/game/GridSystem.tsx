@@ -68,7 +68,7 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
                             isActive && !isRoundIntro && styles.activeCard // Only show green border if intro finished
                         ]}
                     >
-                        <Image source={{ uri: img }} style={styles.image} resizeMode="cover" />
+                        <Image source={typeof img === 'string' ? { uri: img } : img} style={styles.image} resizeMode="cover" />
                     </Animated.View>
                 );
             })}

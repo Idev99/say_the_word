@@ -19,10 +19,6 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             require('../../assets/images/butter.png'),
             require('../../assets/images/bubble.png'),
             require('../../assets/images/baby.png'),
-            require('../../assets/images/bird.png'),
-            require('../../assets/images/butter.png'),
-            require('../../assets/images/bubble.png'),
-            require('../../assets/images/baby.png'),
         ]
     },
     'numbers': {
@@ -30,10 +26,6 @@ const MOCK_LEVELS: Record<string, LevelData> = {
         name: 'Numbers 1-8',
         rounds: 5,
         images: [
-            require('../../assets/images/1.png'),
-            require('../../assets/images/2.png'),
-            require('../../assets/images/3.png'),
-            require('../../assets/images/4.png'),
             require('../../assets/images/1.png'),
             require('../../assets/images/2.png'),
             require('../../assets/images/3.png'),
@@ -49,10 +41,6 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             require('../../assets/images/blue.png'),
             require('../../assets/images/green.png'),
             require('../../assets/images/yellow.png'),
-            require('../../assets/images/red.png'),
-            require('../../assets/images/blue.png'),
-            require('../../assets/images/green.png'),
-            require('../../assets/images/yellow.png'),
         ]
     },
     'country': {
@@ -60,10 +48,6 @@ const MOCK_LEVELS: Record<string, LevelData> = {
         name: 'Country Road C-Pack',
         rounds: 5,
         images: [
-            require('../../assets/images/russia.png'),
-            require('../../assets/images/ukraine.png'),
-            require('../../assets/images/usa.png'),
-            require('../../assets/images/china.png'),
             require('../../assets/images/russia.png'),
             require('../../assets/images/ukraine.png'),
             require('../../assets/images/usa.png'),

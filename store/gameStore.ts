@@ -62,7 +62,21 @@ export const useGameStore = create<GameStore>((set) => ({
 
   setLanguage: (lang) => set({ language: lang }),
   setGameState: (state) => set({ gameState: state }),
-  loadLevel: (level) => set({ currentLevel: level, currentRound: 1, currentBeat: -1, isRoundIntro: false }),
+  loadLevel: (level) => set((state) => {
+    // If it's a featured level, initialize randomly from the pool
+    const pool = level.images;
+    const initialImages = Array(8).fill(null).map(() => pool[Math.floor(Math.random() * pool.length)]);
+    
+    return { 
+        currentLevel: { ...level, images: initialImages },
+        currentRound: 1, 
+        currentBeat: -1, 
+        isRoundIntro: false,
+        // Set these so nextRound() continues to randomize
+        creatorImages: pool,
+        creatorMode: 'RANDOM'
+    };
+  }),
   startRound: () => set({ isPlaying: true, isRoundIntro: true, currentBeat: -1 }),
   endRoundIntro: () => set({ isRoundIntro: false }),
   nextRound: () => set((state) => {
