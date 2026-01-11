@@ -2,12 +2,15 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ScrollView, Ale
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../../store/gameStore';
 import { useState } from 'react';
+import { translations } from '../../constants/translations';
 
 const ROUNDS = [1, 2, 3, 4, 5];
 
 export default function CreatorDesignStep() {
     const router = useRouter();
-    const { creatorImages, creatorRoundLayouts, setCreatorRoundSlot, resetCreator } = useGameStore();
+    const { creatorImages, creatorRoundLayouts, setCreatorRoundSlot, resetCreator, language } = useGameStore();
+    const t = translations[language].creator;
+
     const [activeRound, setActiveRound] = useState(1);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
@@ -70,13 +73,13 @@ export default function CreatorDesignStep() {
                 <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                     <Text style={styles.backButtonText}>←</Text>
                 </TouchableOpacity>
-                <Text style={styles.title}>Design Your Rounds</Text>
+                <Text style={styles.title}>{t.designTitle}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
             <View style={styles.steps}><Text style={styles.step}>1 — 2 — </Text><Text style={styles.stepActive}>3</Text></View>
 
-            <Text style={styles.subtitle}>Tap each slot to choose an image.</Text>
+            <Text style={styles.subtitle}>{t.designSubtitle}</Text>
 
             {/* Centered Numbered Tabs */}
             <View style={styles.tabsContainer}>
@@ -107,14 +110,14 @@ export default function CreatorDesignStep() {
             </View>
 
             <TouchableOpacity onPress={handleFinish} style={styles.finishButton}>
-                <Text style={styles.finishText}>Create Challenge</Text>
+                <Text style={styles.finishText}>{t.finish}</Text>
             </TouchableOpacity>
 
             {/* Image Selection Modal */}
             <Modal visible={modalVisible} animationType="slide" transparent>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Choose an Image</Text>
+                        <Text style={styles.modalTitle}>{t.chooseImage}</Text>
                         <ScrollView contentContainerStyle={styles.modalGallery}>
                             {creatorImages.map((uri, idx) => (
                                 <TouchableOpacity key={idx} onPress={() => handleImageSelect(uri)} style={styles.modalImageContainer}>
@@ -123,7 +126,7 @@ export default function CreatorDesignStep() {
                             ))}
                         </ScrollView>
                         <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                            <Text style={styles.closeText}>Cancel</Text>
+                            <Text style={styles.closeText}>{t.cancel}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -132,18 +135,18 @@ export default function CreatorDesignStep() {
             <Modal visible={confirmModalVisible} animationType="fade" transparent>
                 <View style={styles.modalOverlay}>
                     <View style={styles.confirmModalContent}>
-                        <Text style={styles.modalTitle}>Incomplete Rounds</Text>
+                        <Text style={styles.modalTitle}>{t.incompleteRounds.title}</Text>
                         <Text style={styles.confirmMessage}>
-                            Some slots are empty. Do you want to fill them randomly with your uploaded images?
+                            {t.incompleteRounds.message}
                         </Text>
 
                         <View style={styles.confirmButtons}>
                             <TouchableOpacity onPress={() => setConfirmModalVisible(false)} style={[styles.confirmButton, styles.cancelButton]}>
-                                <Text style={styles.cancelButtonText}>No, Let me Finish</Text>
+                                <Text style={styles.cancelButtonText}>{t.incompleteRounds.no}</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity onPress={handleConfirmFill} style={[styles.confirmButton, styles.okButton]}>
-                                <Text style={styles.okButtonText}>Yes, Auto-Fill</Text>
+                                <Text style={styles.okButtonText}>{t.incompleteRounds.yes}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -157,7 +160,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#FAF9F6',
         alignItems: 'center',
     },
     header: {

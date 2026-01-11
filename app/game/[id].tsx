@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from '
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore, LevelData } from '../../store/gameStore';
 import { useBeatController } from '../../hooks/useBeatController';
+import { translations } from '../../constants/translations';
 
 import GridSystem from '../../components/game/GridSystem';
 import { useEffect, useState } from 'react';
@@ -29,7 +30,8 @@ const MOCK_LEVELS: Record<string, LevelData> = {
 export default function GameScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame } = useGameStore();
+    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language } = useGameStore();
+    const t = translations[language].game;
 
     const [permission, requestPermission] = useCameraPermissions();
     const [isCameraOn, setIsCameraOn] = useState(false);
@@ -65,20 +67,20 @@ export default function GameScreen() {
     };
 
     if (!currentLevel) {
-        return <View style={styles.container}><Text>Loading...</Text></View>;
+        return <View style={styles.container}><Text>{t.loading}</Text></View>;
     }
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={handleBack} style={styles.buttonSmall}>
-                    <Text style={styles.buttonText}>Back</Text>
+                    <Text style={styles.buttonText}>{t.back}</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.roundText}>ROUND {currentRound}/{currentLevel.rounds}</Text>
+                <Text style={styles.roundText}>{t.round} {currentRound}/{currentLevel.rounds}</Text>
 
                 <TouchableOpacity onPress={toggleCamera} style={[styles.buttonSmall, isCameraOn && styles.buttonActive]}>
-                    <Text style={styles.buttonText}>{isCameraOn ? 'Cam ON' : 'Cam OFF'}</Text>
+                    <Text style={styles.buttonText}>{isCameraOn ? t.camOn : t.camOff}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -94,7 +96,7 @@ export default function GameScreen() {
 
                 {!isPlaying && (
                     <TouchableOpacity onPress={handleStart} style={styles.startButton}>
-                        <Text style={styles.startButtonText}>START</Text>
+                        <Text style={styles.startButtonText}>{t.start}</Text>
                     </TouchableOpacity>
                 )}
             </ScrollView>
@@ -105,7 +107,6 @@ export default function GameScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAF9F6',
     },
     scrollView: {
         width: '100%',

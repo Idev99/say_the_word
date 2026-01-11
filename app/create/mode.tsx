@@ -1,10 +1,12 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../../store/gameStore';
+import { translations } from '../../constants/translations';
 
 export default function CreatorStep2() {
     const router = useRouter();
-    const { setCreatorMode } = useGameStore();
+    const { setCreatorMode, language } = useGameStore();
+    const t = translations[language].creator;
 
     const handleSelect = (mode: 'RANDOM' | 'CUSTOM') => {
         setCreatorMode(mode);
@@ -22,26 +24,26 @@ export default function CreatorStep2() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Back</Text>
+                    <Text style={styles.backButtonText}>{t.back}</Text>
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.title}>Choose Mode</Text>
+            <Text style={styles.title}>{t.modeTitle}</Text>
             <View style={styles.steps}><Text style={styles.step}>1 — </Text><Text style={styles.stepActive}>2</Text><Text style={styles.step}> — 3</Text></View>
 
-            <Text style={styles.subtitle}>How do you want to arrange images?</Text>
+            <Text style={styles.subtitle}>{t.modeSubtitle}</Text>
 
             <View style={styles.options}>
                 <TouchableOpacity onPress={() => handleSelect('RANDOM')} style={styles.card}>
                     <Text style={styles.emoji}>🎲</Text>
-                    <Text style={styles.cardTitle}>Random</Text>
-                    <Text style={styles.cardDesc}>System randomly arranges images each round.</Text>
+                    <Text style={styles.cardTitle}>{t.randomTitle}</Text>
+                    <Text style={styles.cardDesc}>{t.randomDesc}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => handleSelect('CUSTOM')} style={styles.card}>
                     <Text style={styles.emoji}>🎯</Text>
-                    <Text style={styles.cardTitle}>Custom Layout</Text>
-                    <Text style={styles.cardDesc}>You design exactly which image goes in each slot.</Text>
+                    <Text style={styles.cardTitle}>{t.customTitle}</Text>
+                    <Text style={styles.cardDesc}>{t.customDesc}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -52,7 +54,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#FAF9F6',
         alignItems: 'center',
     },
     header: {

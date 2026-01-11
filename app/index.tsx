@@ -1,19 +1,24 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useGameStore } from '../store/gameStore';
+import { translations } from '../constants/translations';
 
 export default function HomeScreen() {
     const router = useRouter();
+    const { language } = useGameStore();
+    const t = translations[language].home;
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Say The Word{"\n"}On Beat</Text>
+            <Text style={styles.title}>{t.title}</Text>
 
             <View style={styles.menu}>
                 <TouchableOpacity onPress={() => router.push('/game/numbers')} style={styles.menuButton}>
-                    <Text style={styles.menuText}>PLAY FEATURED</Text>
+                    <Text style={styles.menuText}>{t.playFeatured}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => router.push('/create')} style={[styles.menuButton, styles.createButton]}>
-                    <Text style={styles.menuText}>CREATE CHALLENGE</Text>
+                    <Text style={styles.menuText}>{t.createChallenge}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -23,7 +28,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FAF9F6',
         alignItems: 'center',
         justifyContent: 'center',
     },

@@ -2,10 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } fr
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useGameStore } from '../../store/gameStore';
+import { translations } from '../../constants/translations';
 
 export default function CreatorStep1() {
     const router = useRouter();
-    const { creatorImages, addCreatorImage, removeCreatorImage } = useGameStore();
+    const { creatorImages, addCreatorImage, removeCreatorImage, language } = useGameStore();
+    const t = translations[language].creator;
 
     const handlePickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -22,7 +24,7 @@ export default function CreatorStep1() {
 
     const handleNext = () => {
         if (creatorImages.length < 3) {
-            Alert.alert('Not enough images', 'Please upload at least 3 images.');
+            Alert.alert(t.errorNotEnoughImages.title, t.errorNotEnoughImages.message);
             return;
         }
         router.push('/create/mode');
@@ -30,10 +32,10 @@ export default function CreatorStep1() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Create Challenge</Text>
+            <Text style={styles.title}>{t.step1Title}</Text>
             <View style={styles.steps}><Text style={styles.stepActive}>1</Text><Text style={styles.step}> — 2 — 3</Text></View>
 
-            <Text style={styles.subtitle}>Upload Your Images (Min 3)</Text>
+            <Text style={styles.subtitle}>{t.step1Subtitle}</Text>
 
             <ScrollView contentContainerStyle={styles.gallery}>
                 {creatorImages.map((uri, index) => (
@@ -46,12 +48,12 @@ export default function CreatorStep1() {
                 ))}
 
                 <TouchableOpacity onPress={handlePickImage} style={styles.addButton}>
-                    <Text style={styles.addText}>+ Add Image</Text>
+                    <Text style={styles.addText}>{t.addImage}</Text>
                 </TouchableOpacity>
             </ScrollView>
 
             <TouchableOpacity onPress={handleNext} style={styles.nextButton}>
-                <Text style={styles.nextText}>Next</Text>
+                <Text style={styles.nextText}>{t.next}</Text>
             </TouchableOpacity>
         </View>
     );
@@ -61,7 +63,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#FAF9F6',
         alignItems: 'center',
     },
     title: {

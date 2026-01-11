@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Language } from '../constants/translations';
 
 export type GameState = 'MENU' | 'PLAYING' | 'RESULT' | 'CREATING';
 
@@ -17,8 +18,10 @@ interface GameStore {
   bpm: number;
   isPlaying: boolean;
   isRoundIntro: boolean;
+  language: Language;
 
   // Actions
+  setLanguage: (lang: Language) => void;
   setGameState: (state: GameState) => void;
   loadLevel: (level: LevelData) => void;
   startRound: () => void;
@@ -55,7 +58,9 @@ export const useGameStore = create<GameStore>((set) => ({
 
   isPlaying: false,
   isRoundIntro: false,
+  language: 'EN',
 
+  setLanguage: (lang) => set({ language: lang }),
   setGameState: (state) => set({ gameState: state }),
   loadLevel: (level) => set({ currentLevel: level, currentRound: 1, currentBeat: -1, isRoundIntro: false }),
   startRound: () => set({ isPlaying: true, isRoundIntro: true, currentBeat: -1 }),
