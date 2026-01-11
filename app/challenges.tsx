@@ -56,7 +56,10 @@ export default function ChallengesScreen() {
                 {/* Create Banner */}
                 <TouchableOpacity
                     style={styles.createBanner}
-                    onPress={() => router.push('/create')}
+                    onPress={() => {
+                        useGameStore.getState().resetCreator();
+                        router.push('/create');
+                    }}
                 >
                     <View style={styles.plusBox}>
                         <Ionicons name="add" size={32} color="black" />
