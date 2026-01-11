@@ -1,6 +1,7 @@
 import { View, Image, StyleSheet, Animated, Easing } from 'react-native';
 import { LevelData, useGameStore } from '../../store/gameStore';
 import { useEffect, useRef } from 'react';
+import { useSoundEffects } from '../../hooks/useSoundEffects';
 
 const GAP = 10;
 
@@ -10,39 +11,65 @@ interface GridSystemProps {
 }
 
 export default function GridSystem({ level, activeBeat }: GridSystemProps) {
-    const { isRoundIntro, endRoundIntro } = useGameStore();
+    const { isRoundIntro, endRoundIntro, currentRound } = useGameStore();
+    const { playSound } = useSoundEffects();
+    const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+    const playedIntroForRound = useRef<string | null>(null);
 
     // Create animated values for each possible card (max 8)
     const animValues = useRef([...Array(8)].map(() => new Animated.Value(0))).current;
 
     useEffect(() => {
-        if (isRoundIntro) {
+        // Unique key for this specific round's intro to prevent re-runs within the same round
+        const introKey = `${level.id}-${currentRound}`;
+
+        if (isRoundIntro && playedIntroForRound.current !== introKey) {
+            playedIntroForRound.current = introKey;
+
+            // Play sound only ONCE at the start of the intro
+            playSound('monmagai');
+
             // Reset values to 0 (hidden/start position)
             animValues.forEach(v => v.setValue(0));
 
-            // Start Staggered Animation
-            Animated.stagger(100, animValues.map((anim, i) => {
-                // Ensure we only animate existent images
-                if (i < level.images.length) {
-                    return Animated.timing(anim, {
+            // Clear any existing timeouts to be safe
+            timeoutsRef.current.forEach(clearTimeout);
+            timeoutsRef.current = [];
+
+            // Timing constant for visual stagger
+            const STAGGER_MS = 250;
+
+            // Start Manual Stagger for Animation ONLY
+            level.images.forEach((_, i) => {
+                const t = setTimeout(() => {
+                    Animated.timing(animValues[i], {
                         toValue: 1,
                         duration: 500,
-                        useNativeDriver: false, // safer for web/layout properties sometimes, true for transform
+                        useNativeDriver: false,
                         easing: Easing.out(Easing.back(1.5)),
-                    });
-                }
-                return Animated.delay(0);
-            })).start(({ finished }) => {
-                // Only trigger end of intro if the animation actually finished
-                if (finished) {
-                    endRoundIntro();
-                }
+                    }).start();
+                }, i * STAGGER_MS);
+                timeoutsRef.current.push(t);
             });
-        } else {
-            // Ensure all visible if not in intro (e.g. idle or playing normal loop)
+
+            // Signal end of intro after all cards shown + buffer
+            const endTimeout = setTimeout(() => {
+                playSound('sifflet');
+                endRoundIntro();
+            }, (level.images.length * STAGGER_MS) + 500);
+            timeoutsRef.current.push(endTimeout);
+
+        } else if (!isRoundIntro) {
+            // Ensure all visible if not in intro
             animValues.forEach(v => v.setValue(1));
+            // Clear timeouts if we leave intro early
+            timeoutsRef.current.forEach(clearTimeout);
         }
-    }, [isRoundIntro, level.images.length, endRoundIntro]);
+
+        return () => {
+            timeoutsRef.current.forEach(clearTimeout);
+        };
+    }, [isRoundIntro, level.images.length, level.id, currentRound]);
 
     return (
         <View style={styles.grid}>
