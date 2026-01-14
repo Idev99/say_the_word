@@ -11,7 +11,7 @@ interface GridSystemProps {
 }
 
 export default function GridSystem({ level, activeBeat }: GridSystemProps) {
-    const { isRoundIntro, endRoundIntro, currentRound } = useGameStore();
+    const { isRoundIntro, endRoundIntro, currentRound, introSpeed, introAnimationSpeed } = useGameStore();
     const { playSound } = useSoundEffects();
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
     const playedIntroForRound = useRef<string | null>(null);
@@ -26,25 +26,24 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
         if (isRoundIntro && playedIntroForRound.current !== introKey) {
             playedIntroForRound.current = introKey;
 
-            // Play sound only ONCE at the start of the intro
-            playSound('monmagai', 1.5);
-
-            // Reset values to 0 (hidden/start position)
+            // Initialize animations
             animValues.forEach(v => v.setValue(0));
-
-            // Clear any existing timeouts to be safe
             timeoutsRef.current.forEach(clearTimeout);
             timeoutsRef.current = [];
 
-            // Timing constant for visual stagger
-            const STAGGER_MS = 250;
+            // Start intro sound
+            playSound('monmagaietsifflet2', introSpeed);
 
-            // Start Manual Stagger for Animation ONLY
+            // Stagger animation for cards
+            const BASE_STAGGER = 250;
+            const STAGGER_MS = BASE_STAGGER / introAnimationSpeed;
+            const DURATION_MS = 500 / introAnimationSpeed;
+
             level.images.forEach((_, i) => {
                 const t = setTimeout(() => {
                     Animated.timing(animValues[i], {
                         toValue: 1,
-                        duration: 500,
+                        duration: DURATION_MS,
                         useNativeDriver: false,
                         easing: Easing.out(Easing.back(1.5)),
                     }).start();
@@ -52,13 +51,12 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
                 timeoutsRef.current.push(t);
             });
 
-            // Signal end of intro after all cards shown + buffer
+            // Signal end of intro after ALL card animations finish
+            const totalAnimationTime = ((level.images.length - 1) * STAGGER_MS) + DURATION_MS;
             const endTimeout = setTimeout(() => {
-                playSound('sifflet', 1.0);
                 endRoundIntro();
-            }, (level.images.length * STAGGER_MS) + 500);
+            }, totalAnimationTime);
             timeoutsRef.current.push(endTimeout);
-
         } else if (!isRoundIntro) {
             // Ensure all visible if not in intro
             animValues.forEach(v => v.setValue(1));

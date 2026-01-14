@@ -19,6 +19,8 @@ interface GameStore {
   isPlaying: boolean;
   isRoundIntro: boolean;
   language: Language;
+  introSpeed: number;
+  introAnimationSpeed: number;
 
   // Actions
   setLanguage: (lang: Language) => void;
@@ -27,6 +29,8 @@ interface GameStore {
   startRound: () => void;
   nextRound: () => void;
   setBeat: (beat: number) => void;
+  setIntroSpeed: (speed: number) => void;
+  setIntroAnimationSpeed: (speed: number) => void;
 
   endRoundIntro: () => void;
   stopGame: () => void;
@@ -54,11 +58,13 @@ export const useGameStore = create<GameStore>((set) => ({
   currentLevel: null,
   currentRound: 1,
   currentBeat: -1,
-  bpm: 170, // Default BPM
+  bpm: 210, // Default BPM
 
   isPlaying: false,
   isRoundIntro: false,
   language: 'EN',
+  introSpeed: 1.15,
+  introAnimationSpeed: 1.15,
 
   setLanguage: (lang) => set({ language: lang }),
   setGameState: (state) => set({ gameState: state }),
@@ -103,6 +109,9 @@ export const useGameStore = create<GameStore>((set) => ({
   }),
   setBeat: (beat) => set({ currentBeat: beat }),
   stopGame: () => set({ isPlaying: false, gameState: 'MENU' }),
+  setBpm: (bpm: number) => set({ bpm }),
+  setIntroSpeed: (speed: number) => set({ introSpeed: speed }),
+  setIntroAnimationSpeed: (speed: number) => set({ introAnimationSpeed: speed }),
 
   // Creator Init
   creatorImages: [],
