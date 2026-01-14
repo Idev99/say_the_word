@@ -27,7 +27,7 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
             playedIntroForRound.current = introKey;
 
             // Play sound only ONCE at the start of the intro
-            playSound('monmagai');
+            playSound('monmagai', 1.5);
 
             // Reset values to 0 (hidden/start position)
             animValues.forEach(v => v.setValue(0));

@@ -30,12 +30,13 @@ export const useSoundEffects = () => {
     };
   }, []);
 
-  const playSound = async (name: keyof typeof SOUNDS) => {
+  const playSound = async (name: keyof typeof SOUNDS, rate: number = 1.0) => {
     try {
       const sound = soundsRef.current[name];
       if (sound) {
         // Stop any current playback to ensure a clean start
         await sound.stopAsync();
+        await sound.setRateAsync(rate, true);
         await sound.replayAsync();
       }
     } catch (error) {
