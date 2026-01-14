@@ -54,7 +54,7 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
 
             // Signal end of intro after all cards shown + buffer
             const endTimeout = setTimeout(() => {
-                playSound('sifflet');
+                playSound('sifflet', 1.0);
                 endRoundIntro();
             }, (level.images.length * STAGGER_MS) + 500);
             timeoutsRef.current.push(endTimeout);
