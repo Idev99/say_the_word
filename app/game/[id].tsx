@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore, LevelData } from '../../store/gameStore';
 import { useBeatController } from '../../hooks/useBeatController';
 import { translations } from '../../constants/translations';
-
+import { useSoundEffects } from '../../hooks/useSoundEffects';
 import GridSystem from '../../components/game/GridSystem';
 import { useEffect, useState } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -59,7 +59,8 @@ const MOCK_LEVELS: Record<string, LevelData> = {
 export default function GameScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language } = useGameStore();
+    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame } = useGameStore();
+    const { playSound, stopAllSounds } = useSoundEffects();
     const t = translations[language].game;
 
     const [permission, requestPermission] = useCameraPermissions();
@@ -87,10 +88,15 @@ export default function GameScreen() {
     };
 
     const handleStart = () => {
-        startRound();
+        if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
+            restartGame();
+        } else {
+            startRound();
+        }
     };
 
     const handleBack = () => {
+        stopAllSounds();
         stopGame();
         router.back();
     };

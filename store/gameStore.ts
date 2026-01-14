@@ -34,6 +34,7 @@ interface GameStore {
 
   endRoundIntro: () => void;
   stopGame: () => void;
+  restartGame: () => void;
 
   // Creator State
   creatorImages: string[];
@@ -108,10 +109,31 @@ export const useGameStore = create<GameStore>((set) => ({
       };
   }),
   setBeat: (beat) => set({ currentBeat: beat }),
-  stopGame: () => set({ isPlaying: false, gameState: 'MENU' }),
+  stopGame: () => set({ isPlaying: false, gameState: 'MENU', isRoundIntro: false, currentBeat: -1 }),
   setBpm: (bpm: number) => set({ bpm }),
   setIntroSpeed: (speed: number) => set({ introSpeed: speed }),
   setIntroAnimationSpeed: (speed: number) => set({ introAnimationSpeed: speed }),
+
+  restartGame: () => set((state) => {
+    let nextImages = state.currentLevel?.images || [];
+    
+    if (state.creatorMode === 'RANDOM' && state.creatorImages.length > 0) {
+      nextImages = Array(8).fill(null).map(() => state.creatorImages[Math.floor(Math.random() * state.creatorImages.length)]);
+    } else if (state.creatorMode === 'CUSTOM' && state.creatorRoundLayouts) {
+      const roundLayout = state.creatorRoundLayouts[1];
+      if (roundLayout) {
+        nextImages = roundLayout.map(img => img || 'https://via.placeholder.com/150') as string[];
+      }
+    }
+
+    return {
+      currentRound: 1,
+      currentBeat: -1,
+      isPlaying: true,
+      isRoundIntro: true,
+      currentLevel: state.currentLevel ? { ...state.currentLevel, images: nextImages } : null
+    };
+  }),
 
   // Creator Init
   creatorImages: [],

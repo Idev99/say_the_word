@@ -58,5 +58,15 @@ export const useSoundEffects = () => {
     });
   };
 
-  return { playSound };
+  const stopAllSounds = async () => {
+    try {
+      for (const sound of Object.values(globalSounds)) {
+        await sound.stopAsync();
+      }
+    } catch (error) {
+      console.warn('Error stopping sounds', error);
+    }
+  };
+
+  return { playSound, stopAllSounds };
 };
