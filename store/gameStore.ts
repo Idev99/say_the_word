@@ -54,7 +54,7 @@ export const useGameStore = create<GameStore>((set) => ({
   currentLevel: null,
   currentRound: 1,
   currentBeat: -1,
-  bpm: 100, // Default BPM
+  bpm: 170, // Default BPM
 
   isPlaying: false,
   isRoundIntro: false,
