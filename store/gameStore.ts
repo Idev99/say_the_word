@@ -31,6 +31,7 @@ interface GameStore {
   language: Language;
   introSpeed: number;
   introAnimationSpeed: number;
+  activeTab: 'featured' | 'community';
 
   // Community State
   communityChallenges: CommunityChallenge[];
@@ -48,6 +49,7 @@ interface GameStore {
   endRoundIntro: () => void;
   stopGame: () => void;
   restartGame: () => void;
+  setActiveTab: (tab: 'featured' | 'community') => void;
 
   // Creator State
   creatorName: string;
@@ -82,6 +84,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   language: 'EN',
   introSpeed: 1.15,
   introAnimationSpeed: 1.15,
+  activeTab: 'featured',
 
   communityChallenges: [
     {
@@ -261,6 +264,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         createdAt: Date.now() - (20 * 24 * 60 * 60 * 1000),
     }
   ],
+  
+  setActiveTab: (tab) => set({ activeTab: tab }),
   
   setLanguage: (lang) => set({ language: lang }),
   setGameState: (state) => set({ gameState: state }),

@@ -23,6 +23,11 @@ export const translations = {
                 numbers: "Numbers",
                 colors: "Colors",
                 country: "Country Road C-Pack",
+            },
+            sort: {
+                plays: "Most Played",
+                likes: "Most Liked",
+                newest: "Newest",
             }
         },
         creator: {
@@ -88,6 +93,11 @@ export const translations = {
                 numbers: "Chiffres",
                 colors: "Couleurs",
                 country: "Country Road C-Pack",
+            },
+            sort: {
+                plays: "Plus joués",
+                likes: "Plus aimés",
+                newest: "Nouveautés",
             }
         },
         creator: {
@@ -152,6 +162,11 @@ export const translations = {
                 numbers: "Números",
                 colors: "Colores",
                 country: "Country Road C-Pack",
+            },
+            sort: {
+                plays: "Más Jugados",
+                likes: "Más Gustados",
+                newest: "Novedades",
             }
         },
         creator: {

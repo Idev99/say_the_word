@@ -33,16 +33,15 @@ const ICON_MAP: Record<string, any> = {
 
 export default function ChallengesScreen() {
     const router = useRouter();
-    const { language, communityChallenges, loadLevel } = useGameStore();
+    const { language, communityChallenges, loadLevel, activeTab, setActiveTab } = useGameStore();
     const t = translations[language].challenges;
 
-    const [activeTab, setActiveTab] = React.useState<'featured' | 'community'>('featured');
-    const [sortBy, setSortBy] = React.useState<'plays' | 'likes' | 'dislikes'>('plays');
+    const [sortBy, setSortBy] = React.useState<'plays' | 'likes' | 'newest'>('plays');
 
     const sortedCommunity = [...communityChallenges].sort((a, b) => {
         if (sortBy === 'plays') return b.playsCount - a.playsCount;
         if (sortBy === 'likes') return b.likes - a.likes;
-        if (sortBy === 'dislikes') return a.dislikes - b.dislikes; // More dislikes is "less liked"? User said "moins aimé" (least liked/most disliked)
+        if (sortBy === 'newest') return b.createdAt - a.createdAt;
         return 0;
     });
 
@@ -140,13 +139,13 @@ export default function ChallengesScreen() {
                         {/* Sorting UI */}
                         <View style={styles.sortContainer}>
                             <TouchableOpacity onPress={() => setSortBy('plays')} style={[styles.sortButton, sortBy === 'plays' && styles.sortButtonActive]}>
-                                <Text style={styles.sortText}>Most Played</Text>
+                                <Text style={styles.sortText}>{t.sort?.plays || "Most Played"}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => setSortBy('likes')} style={[styles.sortButton, sortBy === 'likes' && styles.sortButtonActive]}>
-                                <Text style={styles.sortText}>Most Liked</Text>
+                                <Text style={styles.sortText}>{t.sort?.likes || "Most Liked"}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setSortBy('dislikes')} style={[styles.sortButton, sortBy === 'dislikes' && styles.sortButtonActive]}>
-                                <Text style={styles.sortText}>Least Liked</Text>
+                            <TouchableOpacity onPress={() => setSortBy('newest')} style={[styles.sortButton, sortBy === 'newest' && styles.sortButtonActive]}>
+                                <Text style={styles.sortText}>{t.sort?.newest || "Newest"}</Text>
                             </TouchableOpacity>
                         </View>
 
