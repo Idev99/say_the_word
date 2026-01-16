@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ScrollView, Alert, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../../store/gameStore';
 import { useState } from 'react';
@@ -8,7 +8,10 @@ const ROUNDS = [1, 2, 3, 4, 5];
 
 export default function CreatorDesignStep() {
     const router = useRouter();
-    const { creatorImages, creatorRoundLayouts, setCreatorRoundSlot, resetCreator, language } = useGameStore();
+    const {
+        creatorImages, creatorRoundLayouts, setCreatorRoundSlot,
+        resetCreator, language, saveChallenge, creatorName, setCreatorName
+    } = useGameStore();
     const t = translations[language].creator;
 
     const [activeRound, setActiveRound] = useState(1);
@@ -18,6 +21,7 @@ export default function CreatorDesignStep() {
     const currentLayout = creatorRoundLayouts[activeRound] || Array(8).fill(null);
 
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const [nameModalVisible, setNameModalVisible] = useState(false);
 
     const handleSlotPress = (index: number) => {
         setSelectedSlot(index);
@@ -33,20 +37,38 @@ export default function CreatorDesignStep() {
     };
 
     const handleFinish = () => {
-        // Check for ANY empty slots across all rounds
+        if (checkIncomplete()) return;
+        proceedToGame();
+    };
+
+    const handleSavePress = () => {
+        if (checkIncomplete()) return;
+        setNameModalVisible(true);
+    };
+
+    const checkIncomplete = () => {
         const hasEmptySlots = [1, 2, 3, 4, 5].some(r => {
             const layout = creatorRoundLayouts[r] || Array(8).fill(null);
             return layout.some(slot => slot === null);
         });
 
         if (hasEmptySlots) {
-            // Show custom confirmation modal
             setConfirmModalVisible(true);
+            return true;
+        }
+        return false;
+    };
+
+    const confirmSave = () => {
+        if (!creatorName.trim()) {
+            Alert.alert("Required", "Please enter a name for your challenge");
             return;
         }
-
-        // If no empty slots, proceed directly
-        proceedToGame();
+        saveChallenge();
+        setNameModalVisible(false);
+        resetCreator();
+        router.push('/challenges');
+        // We might need a small delay or state sync to show the community tab immediately
     };
 
     const proceedToGame = () => {
@@ -59,7 +81,6 @@ export default function CreatorDesignStep() {
         const { fillRandomSlots } = useGameStore.getState();
         fillRandomSlots();
         setConfirmModalVisible(false);
-        proceedToGame();
     };
 
     const handleBack = () => {
@@ -122,9 +143,15 @@ export default function CreatorDesignStep() {
                 ))}
             </View>
 
-            <TouchableOpacity onPress={handleFinish} style={styles.finishButton}>
-                <Text style={styles.finishText}>{t.finish}</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonRow}>
+                <TouchableOpacity onPress={handleSavePress} style={[styles.finishButton, styles.saveButton]}>
+                    <Text style={[styles.finishText, styles.saveText]}>{t.save}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleFinish} style={styles.finishButton}>
+                    <Text style={styles.finishText}>{t.finish}</Text>
+                </TouchableOpacity>
+            </View>
 
             {/* Image Selection Modal */}
             <Modal visible={modalVisible} animationType="slide" transparent>
@@ -308,17 +335,38 @@ const styles = StyleSheet.create({
     },
     finishButton: {
         marginTop: 40,
-        width: '100%',
         padding: 15,
         backgroundColor: '#FFEB3B',
         borderRadius: 10,
         alignItems: 'center',
         borderWidth: 2,
         borderColor: 'black',
+        flex: 1,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        gap: 15,
+        width: '100%',
+        marginTop: 40,
+    },
+    saveButton: {
+        backgroundColor: '#6BF178', // Green like the banner
+    },
+    saveText: {
+        fontSize: 14,
     },
     finishText: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
+    },
+    nameInput: {
+        width: '100%',
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 8,
+        padding: 10,
+        marginBottom: 20,
+        fontSize: 16,
     },
     modalOverlay: {
         flex: 1,

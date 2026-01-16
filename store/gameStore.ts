@@ -10,6 +10,16 @@ export interface LevelData {
   rounds: number;
 }
 
+export interface CommunityChallenge extends LevelData {
+  creatorMode: 'RANDOM' | 'CUSTOM';
+  creatorRoundLayouts: Record<number, (string | null)[]>;
+  creatorImages: string[];
+  playsCount: number;
+  likes: number;
+  dislikes: number;
+  createdAt: number; // timestamp
+}
+
 interface GameStore {
   gameState: GameState;
   currentLevel: LevelData | null;
@@ -22,10 +32,13 @@ interface GameStore {
   introSpeed: number;
   introAnimationSpeed: number;
 
+  // Community State
+  communityChallenges: CommunityChallenge[];
+
   // Actions
   setLanguage: (lang: Language) => void;
   setGameState: (state: GameState) => void;
-  loadLevel: (level: LevelData) => void;
+  loadLevel: (level: LevelData | CommunityChallenge) => void;
   startRound: () => void;
   nextRound: () => void;
   setBeat: (beat: number) => void;
@@ -37,16 +50,19 @@ interface GameStore {
   restartGame: () => void;
 
   // Creator State
+  creatorName: string;
   creatorImages: string[];
   creatorMode: 'RANDOM' | 'CUSTOM';
   creatorRoundLayouts: Record<number, (string | null)[]>; // Round -> Array of 8 images (or null)
 
   // Creator Actions
+  setCreatorName: (name: string) => void;
   addCreatorImage: (uri: string) => void;
   removeCreatorImage: (index: number) => void;
   setCreatorMode: (mode: 'RANDOM' | 'CUSTOM') => void;
   setCreatorRoundSlot: (round: number, slotIndex: number, imageUri: string) => void;
   fillRandomSlots: () => void;
+  saveChallenge: () => void;
 
   resetCreator: () => void;
   
@@ -54,7 +70,7 @@ interface GameStore {
   loadCustomLevel: () => void;
 }
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   gameState: 'MENU',
   currentLevel: null,
   currentRound: 1,
@@ -67,10 +83,77 @@ export const useGameStore = create<GameStore>((set) => ({
   introSpeed: 1.15,
   introAnimationSpeed: 1.15,
 
+  communityChallenges: [
+    {
+        id: 'comm-1',
+        name: 'Super Stars',
+        rounds: 5,
+        images: [],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: {
+            1: ['https://via.placeholder.com/150/FFEB3B', 'https://via.placeholder.com/150/FFEB3B', null, null, null, null, null, null],
+            2: [], 3: [], 4: [], 5: []
+        },
+        creatorImages: ['https://via.placeholder.com/150/FFEB3B'],
+        playsCount: 1200,
+        likes: 55,
+        dislikes: 12,
+        createdAt: Date.now() - (22 * 24 * 60 * 60 * 1000),
+    },
+    {
+        id: 'comm-2',
+        name: 'Emoji Fun',
+        rounds: 5,
+        images: [],
+        creatorMode: 'RANDOM',
+        creatorRoundLayouts: { 1: [], 2: [], 3: [], 4: [], 5: [] },
+        creatorImages: ['https://via.placeholder.com/150/FF508E', 'https://via.placeholder.com/150/A2D2FF'],
+        playsCount: 3500,
+        likes: 150,
+        dislikes: 11,
+        createdAt: Date.now() - (25 * 24 * 60 * 60 * 1000),
+    },
+    {
+        id: 'comm-3',
+        name: 'Nature Pack',
+        rounds: 5,
+        images: [],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: { 1: [], 2: [], 3: [], 4: [], 5: [] },
+        creatorImages: [],
+        playsCount: 996,
+        likes: 6,
+        dislikes: 6,
+        createdAt: Date.now() - (30 * 24 * 60 * 60 * 1000),
+    }
+  ],
+  
   setLanguage: (lang) => set({ language: lang }),
   setGameState: (state) => set({ gameState: state }),
   loadLevel: (level) => set((state) => {
-    // If it's a featured level, initialize randomly from the pool
+    const isCommunity = 'creatorMode' in level;
+    
+    if (isCommunity) {
+      const comm = level as CommunityChallenge;
+      let initialImages: string[] = [];
+      if (comm.creatorMode === 'CUSTOM') {
+          initialImages = (comm.creatorRoundLayouts[1] || Array(8).fill(null)).map(img => img || 'https://via.placeholder.com/150');
+      } else {
+          initialImages = Array(8).fill(null).map(() => comm.creatorImages[Math.floor(Math.random() * comm.creatorImages.length)]);
+      }
+
+      return {
+          currentLevel: { ...comm, images: initialImages },
+          currentRound: 1,
+          currentBeat: -1,
+          isRoundIntro: false,
+          creatorImages: comm.creatorImages,
+          creatorMode: comm.creatorMode,
+          creatorRoundLayouts: comm.creatorRoundLayouts
+      };
+    }
+
+    // Featured Level Logic
     const pool = level.images;
     const initialImages = Array(8).fill(null).map(() => pool[Math.floor(Math.random() * pool.length)]);
     
@@ -136,17 +219,18 @@ export const useGameStore = create<GameStore>((set) => ({
   }),
 
   // Creator Init
+  creatorName: '',
   creatorImages: [],
   creatorMode: 'RANDOM',
   creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) },
 
+  setCreatorName: (name) => set({ creatorName: name }),
   addCreatorImage: (uri) => set((state) => ({ creatorImages: [...state.creatorImages, uri] })),
   removeCreatorImage: (index) => set((state) => ({ creatorImages: state.creatorImages.filter((_, i) => i !== index) })),
   setCreatorMode: (mode) => set({ creatorMode: mode }),
   setCreatorRoundSlot: (round, slot, uri) => set((state) => {
       const currentRoundLayout = [...(state.creatorRoundLayouts[round] || Array(8).fill(null))];
       currentRoundLayout[slot] = uri;
-      return { creatorRoundLayouts: { ...state.creatorRoundLayouts, [round]: currentRoundLayout } };
       return { creatorRoundLayouts: { ...state.creatorRoundLayouts, [round]: currentRoundLayout } };
   }),
   fillRandomSlots: () => set((state) => {
@@ -164,48 +248,46 @@ export const useGameStore = create<GameStore>((set) => ({
       });
       return { creatorRoundLayouts: newLayouts };
   }),
-  resetCreator: () => set({ creatorImages: [], creatorMode: 'RANDOM', creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) } }),
+  saveChallenge: () => set((state) => {
+      const id = `comm-${Date.now()}`;
+      const newChallenge: CommunityChallenge = {
+          id: id,
+          name: state.creatorName || 'Unnamed Challenge',
+          images: [], // We use roundLayouts instead
+          rounds: 5,
+          creatorMode: state.creatorMode,
+          creatorRoundLayouts: state.creatorRoundLayouts,
+          creatorImages: state.creatorImages,
+          playsCount: 0,
+          likes: 0,
+          dislikes: 0,
+          createdAt: Date.now(),
+      };
+      
+      return {
+          communityChallenges: [newChallenge, ...state.communityChallenges],
+      };
+  }),
+  resetCreator: () => set({ creatorName: '', creatorImages: [], creatorMode: 'RANDOM', creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) } }),
 
   loadCustomLevel: () => set((state) => {
     // Generate Level Data from Creator State
     const customLevel: LevelData = {
       id: 'custom',
-      name: 'My Challenge',
+      name: state.creatorName || 'My Challenge',
       rounds: 5,
-      images: [], // This will be dynamic per round in the real game logic, but for now we need a flat list or handle it in GameScreen
+      images: [], 
     };
-
-    // For the current GridSystem, it expects `level.images` to be the *current round's* images.
-    // The current implementation of GridSystem uses `level.images` which is static for the level in MOCK_DATA.
-    // We need to support round-specific images. 
-    // Let's modify the store to just set the currentLevel with the *current round's* layout when we start/next round?
-    // OR: simpler for MVP: just put round 1's images in `images` initially.
-    
-    // Actually, `loadLevel` sets `currentLevel`.
-    // In `nextRound`, we might need logic to update `currentLevel.images` if it's a custom game.
-    // But `LevelData` structure implies static images for the whole level?
-    // MOCK_LEVELS has 5 rounds but only 1 array of images.
-    // This implies the same images are used for all rounds in the mock.
-    // But the Custom Creator allows different images per round.
-    
-    // Fix: We'll construct the level, but we might need to change how GameScreen gets images.
-    // For now, let's just use Round 1's layout for the initial load.
     
     const r1Images = state.creatorMode === 'CUSTOM' 
-      ? state.creatorRoundLayouts[1].map(img => img || 'https://via.placeholder.com/150') // Fallback
+      ? (state.creatorRoundLayouts[1] || Array(8).fill(null)).map(img => img || 'https://via.placeholder.com/150')
       : Array(8).fill(null).map(() => state.creatorImages[Math.floor(Math.random() * state.creatorImages.length)]);
 
     return {
-        currentLevel: {
-            ...customLevel,
-            images: r1Images as string[]
-        },
+        currentLevel: { ...customLevel, images: r1Images as string[] },
         currentRound: 1,
         currentBeat: -1,
-        gameState: 'MENU',
-        // metadata for custom game handling
-        creatorRoundLayouts: state.creatorRoundLayouts, 
-        creatorMode: state.creatorMode
+        isPlaying: false,
     };
   }),
 }));
