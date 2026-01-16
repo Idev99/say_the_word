@@ -133,19 +133,21 @@ export default function ChallengesScreen() {
                     <View>
                         {/* Community Header Box */}
                         <View style={[styles.sectionHeader, { backgroundColor: '#FF508E', alignSelf: 'center', width: '90%', marginBottom: 15 }]}>
-                            <Text style={[styles.sectionHeaderText, { fontSize: 18, textAlign: 'center' }]}>COMMUNITY CHALLENGES</Text>
+                            <Text style={[styles.sectionHeaderText, { fontSize: 18, textAlign: 'center' }]}>
+                                {((t as any).communityTitle || "COMMUNITY CHALLENGES").toUpperCase()}
+                            </Text>
                         </View>
 
                         {/* Sorting UI */}
                         <View style={styles.sortContainer}>
                             <TouchableOpacity onPress={() => setSortBy('plays')} style={[styles.sortButton, sortBy === 'plays' && styles.sortButtonActive]}>
-                                <Text style={styles.sortText}>{t.sort?.plays || "Most Played"}</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setSortBy('likes')} style={[styles.sortButton, sortBy === 'likes' && styles.sortButtonActive]}>
-                                <Text style={styles.sortText}>{t.sort?.likes || "Most Liked"}</Text>
+                                <Text style={styles.sortText}>{(t as any).sort?.plays || "Most Played"}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => setSortBy('newest')} style={[styles.sortButton, sortBy === 'newest' && styles.sortButtonActive]}>
-                                <Text style={styles.sortText}>{t.sort?.newest || "Newest"}</Text>
+                                <Text style={styles.sortText}>{(t as any).sort?.newest || "Newest"}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setSortBy('likes')} style={[styles.sortButton, sortBy === 'likes' && styles.sortButtonActive]}>
+                                <Text style={styles.sortText}>{(t as any).sort?.likes || "Most Liked"}</Text>
                             </TouchableOpacity>
                         </View>
 

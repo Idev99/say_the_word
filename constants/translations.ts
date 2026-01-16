@@ -17,6 +17,7 @@ export const translations = {
             },
             createBanner: "Create Your Own Challenge",
             featuredTitle: "FEATURED CHALLENGES",
+            communityTitle: "COMMUNITY CHALLENGES",
             play: "PLAY",
             list: {
                 bird: "Bird Butter Bubble",
@@ -79,7 +80,7 @@ export const translations = {
         },
         challenges: {
             tabs: {
-                featured: "SÉQUENCES",
+                featured: "Pour toi",
                 community: "COMMUNAUTÉ",
                 videos: "VIDÉOS",
                 create: "CRÉER",
@@ -87,6 +88,7 @@ export const translations = {
             },
             createBanner: "Crée ton propre défi",
             featuredTitle: "DÉFIS À LA UNE",
+            communityTitle: "challenges de la communauté",
             play: "JOUER",
             list: {
                 bird: "Bird Butter Bubble",
@@ -95,8 +97,8 @@ export const translations = {
                 country: "Country Road C-Pack",
             },
             sort: {
-                plays: "Plus joués",
-                likes: "Plus aimés",
+                plays: "Les plus joués",
+                likes: "Les plus aimés",
                 newest: "Nouveautés",
             }
         },
@@ -156,6 +158,7 @@ export const translations = {
             },
             createBanner: "Crea tu propio desafío",
             featuredTitle: "DESAFÍOS DESTACADOS",
+            communityTitle: "DESAFÍOS DE LA COMUNIDAD",
             play: "JUGAR",
             list: {
                 bird: "Bird Butter Bubble",
