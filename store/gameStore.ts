@@ -6,14 +6,14 @@ export type GameState = 'MENU' | 'PLAYING' | 'RESULT' | 'CREATING';
 export interface LevelData {
   id: string;
   name: string;
-  images: string[]; // URLs or local paths
+  images: any[]; // URLs or local paths
   rounds: number;
 }
 
 export interface CommunityChallenge extends LevelData {
   creatorMode: 'RANDOM' | 'CUSTOM';
-  creatorRoundLayouts: Record<number, (string | null)[]>;
-  creatorImages: string[];
+  creatorRoundLayouts: Record<number, (any | null)[]>;
+  creatorImages: any[];
   playsCount: number;
   likes: number;
   dislikes: number;
@@ -51,9 +51,9 @@ interface GameStore {
 
   // Creator State
   creatorName: string;
-  creatorImages: string[];
+  creatorImages: any[];
   creatorMode: 'RANDOM' | 'CUSTOM';
-  creatorRoundLayouts: Record<number, (string | null)[]>; // Round -> Array of 8 images (or null)
+  creatorRoundLayouts: Record<number, (any | null)[]>; // Round -> Array of 8 images (or null)
 
   // Creator Actions
   setCreatorName: (name: string) => void;
@@ -86,28 +86,61 @@ export const useGameStore = create<GameStore>((set, get) => ({
   communityChallenges: [
     {
         id: 'comm-1',
-        name: 'Super Stars',
+        name: 'French Streamers',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
         creatorRoundLayouts: {
-            1: ['https://via.placeholder.com/150/FFEB3B', 'https://via.placeholder.com/150/FFEB3B', null, null, null, null, null, null],
-            2: [], 3: [], 4: [], 5: []
+            1: [
+              require('../assets/images/billy.png'), require('../assets/images/squeezie.png'), require('../assets/images/biaggi.png'),
+              require('../assets/images/squeezie.png'), require('../assets/images/billy.png'), require('../assets/images/biaggi.png'),
+              require('../assets/images/biaggi.png'), require('../assets/images/billy.png')
+            ],
+            2: [
+              require('../assets/images/squeezie.png'), require('../assets/images/biaggi.png'), require('../assets/images/billy.png'),
+              require('../assets/images/biaggi.png'), require('../assets/images/squeezie.png'), require('../assets/images/billy.png'),
+              require('../assets/images/billy.png'), require('../assets/images/squeezie.png')
+            ],
+            3: [
+              require('../assets/images/biaggi.png'), require('../assets/images/billy.png'), require('../assets/images/squeezie.png'),
+              require('../assets/images/billy.png'), require('../assets/images/biaggi.png'), require('../assets/images/squeezie.png'),
+              require('../assets/images/squeezie.png'), require('../assets/images/biaggi.png')
+            ],
+            4: [
+              require('../assets/images/billy.png'), require('../assets/images/biaggi.png'), require('../assets/images/squeezie.png'),
+              require('../assets/images/squeezie.png'), require('../assets/images/billy.png'), require('../assets/images/biaggi.png'),
+              require('../assets/images/biaggi.png'), require('../assets/images/squeezie.png')
+            ],
+            5: [
+              require('../assets/images/squeezie.png'), require('../assets/images/billy.png'), require('../assets/images/biaggi.png'),
+              require('../assets/images/billy.png'), require('../assets/images/squeezie.png'), require('../assets/images/biaggi.png'),
+              require('../assets/images/biaggi.png'), require('../assets/images/billy.png')
+            ]
         },
-        creatorImages: ['https://via.placeholder.com/150/FFEB3B'],
-        playsCount: 1200,
-        likes: 55,
-        dislikes: 12,
-        createdAt: Date.now() - (22 * 24 * 60 * 60 * 1000),
+        creatorImages: [
+          require('../assets/images/squeezie.png'), 
+          require('../assets/images/billy.png'), 
+          require('../assets/images/biaggi.png')
+        ],
+        playsCount: 15400,
+        likes: 1205,
+        dislikes: 42,
+        createdAt: Date.now() - (2 * 24 * 60 * 60 * 1000),
     },
     {
         id: 'comm-2',
-        name: 'Emoji Fun',
+        name: 'Foodie Fest',
         rounds: 5,
         images: [],
-        creatorMode: 'RANDOM',
-        creatorRoundLayouts: { 1: [], 2: [], 3: [], 4: [], 5: [] },
-        creatorImages: ['https://via.placeholder.com/150/FF508E', 'https://via.placeholder.com/150/A2D2FF'],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: {
+            1: [require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png')],
+            2: [require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png')],
+            3: [require('../assets/images/steak.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/watermelon.png')],
+            4: [require('../assets/images/watermelon.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/steak.png')],
+            5: [require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png'), require('../assets/images/watermelon.png'), require('../assets/images/steak.png')]
+        },
+        creatorImages: [require('../assets/images/steak.png'), require('../assets/images/watermelon.png')],
         playsCount: 3500,
         likes: 150,
         dislikes: 11,
@@ -115,16 +148,117 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
     {
         id: 'comm-3',
-        name: 'Nature Pack',
+        name: 'Vibration',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
-        creatorRoundLayouts: { 1: [], 2: [], 3: [], 4: [], 5: [] },
-        creatorImages: [],
+        creatorRoundLayouts: {
+            1: [require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png')],
+            2: [require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png')],
+            3: [require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png')],
+            4: [require('../assets/images/msn.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/msn.png')],
+            5: [require('../assets/images/piscine.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png'), require('../assets/images/scene.png'), require('../assets/images/msn.png'), require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/piscine.png')]
+        },
+        creatorImages: [require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png')],
         playsCount: 996,
         likes: 6,
-        dislikes: 6,
+        dislikes: 2,
         createdAt: Date.now() - (30 * 24 * 60 * 60 * 1000),
+    },
+    {
+        id: 'comm-4',
+        name: 'Kids Fun',
+        rounds: 5,
+        images: [],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: {
+            1: [require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png'), require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png'), require('../assets/images/baby.png'), require('../assets/images/bird.png')],
+            2: [require('../assets/images/cat.png'), require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png'), require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png'), require('../assets/images/baby.png')],
+            3: [require('../assets/images/bird.png'), require('../assets/images/cat.png'), require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png'), require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png')],
+            4: [require('../assets/images/baby.png'), require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png'), require('../assets/images/cat.png'), require('../assets/images/baby.png'), require('../assets/images/baby.png')],
+            5: [require('../assets/images/cat.png'), require('../assets/images/cat.png'), require('../assets/images/bird.png'), require('../assets/images/bird.png'), require('../assets/images/baby.png'), require('../assets/images/baby.png'), require('../assets/images/cat.png'), require('../assets/images/cat.png')]
+        },
+        creatorImages: [require('../assets/images/baby.png'), require('../assets/images/bird.png'), require('../assets/images/cat.png')],
+        playsCount: 120,
+        likes: 12,
+        dislikes: 0,
+        createdAt: Date.now() - (1 * 24 * 60 * 60 * 1000),
+    },
+    {
+        id: 'comm-5',
+        name: 'Rainbow Dash',
+        rounds: 5,
+        images: [],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: {
+            1: [require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png'), require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png')],
+            2: [require('../assets/images/yellow.png'), require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png'), require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png')],
+            3: [require('../assets/images/green.png'), require('../assets/images/yellow.png'), require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png'), require('../assets/images/red.png'), require('../assets/images/blue.png')],
+            4: [require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png'), require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png'), require('../assets/images/red.png')],
+            5: [require('../assets/images/red.png'), require('../assets/images/yellow.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/red.png'), require('../assets/images/yellow.png'), require('../assets/images/blue.png'), require('../assets/images/green.png')]
+        },
+        creatorImages: [require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png')],
+        playsCount: 2500,
+        likes: 88,
+        dislikes: 2,
+        createdAt: Date.now() - (5 * 24 * 60 * 60 * 1000),
+    },
+    {
+        id: 'comm-6',
+        name: 'World Tour',
+        rounds: 5,
+        images: [],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: {
+            1: [require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png'), require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png')],
+            2: [require('../assets/images/ukraine.png'), require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png'), require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png')],
+            3: [require('../assets/images/russia.png'), require('../assets/images/ukraine.png'), require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png'), require('../assets/images/usa.png'), require('../assets/images/china.png')],
+            4: [require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png'), require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png'), require('../assets/images/usa.png')],
+            5: [require('../assets/images/usa.png'), require('../assets/images/russia.png'), require('../assets/images/china.png'), require('../assets/images/ukraine.png'), require('../assets/images/usa.png'), require('../assets/images/russia.png'), require('../assets/images/china.png'), require('../assets/images/ukraine.png')]
+        },
+        creatorImages: [require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png')],
+        playsCount: 1800,
+        likes: 45,
+        dislikes: 3,
+        createdAt: Date.now() - (10 * 24 * 60 * 60 * 1000),
+    },
+    {
+        id: 'comm-7',
+        name: 'Number Mania',
+        rounds: 5,
+        images: [],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: {
+            1: [require('../assets/images/1.png'), require('../assets/images/2.png'), require('../assets/images/3.png'), require('../assets/images/4.png'), require('../assets/images/1.png'), require('../assets/images/2.png'), require('../assets/images/3.png'), require('../assets/images/4.png')],
+            2: [require('../assets/images/4.png'), require('../assets/images/1.png'), require('../assets/images/2.png'), require('../assets/images/3.png'), require('../assets/images/4.png'), require('../assets/images/1.png'), require('../assets/images/2.png'), require('../assets/images/3.png')],
+            3: [require('../assets/images/3.png'), require('../assets/images/4.png'), require('../assets/images/1.png'), require('../assets/images/2.png'), require('../assets/images/3.png'), require('../assets/images/4.png'), require('../assets/images/1.png'), require('../assets/images/2.png')],
+            4: [require('../assets/images/2.png'), require('../assets/images/3.png'), require('../assets/images/4.png'), require('../assets/images/1.png'), require('../assets/images/2.png'), require('../assets/images/3.png'), require('../assets/images/4.png'), require('../assets/images/1.png')],
+            5: [require('../assets/images/1.png'), require('../assets/images/3.png'), require('../assets/images/2.png'), require('../assets/images/4.png'), require('../assets/images/1.png'), require('../assets/images/3.png'), require('../assets/images/2.png'), require('../assets/images/4.png')]
+        },
+        creatorImages: [require('../assets/images/1.png'), require('../assets/images/2.png'), require('../assets/images/3.png'), require('../assets/images/4.png')],
+        playsCount: 4200,
+        likes: 210,
+        dislikes: 5,
+        createdAt: Date.now() - (15 * 24 * 60 * 60 * 1000),
+    },
+    {
+        id: 'comm-8',
+        name: 'Coffee Break',
+        rounds: 5,
+        images: [],
+        creatorMode: 'CUSTOM',
+        creatorRoundLayouts: {
+            1: [require('../assets/images/coffee.png'), require('../assets/images/cake.png'), require('../assets/images/butter.png'), require('../assets/images/bubble.png'), require('../assets/images/coffee.png'), require('../assets/images/cake.png'), require('../assets/images/butter.png'), require('../assets/images/bubble.png')],
+            2: [require('../assets/images/bubble.png'), require('../assets/images/coffee.png'), require('../assets/images/cake.png'), require('../assets/images/butter.png'), require('../assets/images/bubble.png'), require('../assets/images/coffee.png'), require('../assets/images/cake.png'), require('../assets/images/butter.png')],
+            3: [require('../assets/images/butter.png'), require('../assets/images/bubble.png'), require('../assets/images/coffee.png'), require('../assets/images/cake.png'), require('../assets/images/butter.png'), require('../assets/images/bubble.png'), require('../assets/images/coffee.png'), require('../assets/images/cake.png')],
+            4: [require('../assets/images/cake.png'), require('../assets/images/butter.png'), require('../assets/images/bubble.png'), require('../assets/images/coffee.png'), require('../assets/images/cake.png'), require('../assets/images/butter.png'), require('../assets/images/bubble.png'), require('../assets/images/coffee.png')],
+            5: [require('../assets/images/coffee.png'), require('../assets/images/butter.png'), require('../assets/images/cake.png'), require('../assets/images/bubble.png'), require('../assets/images/coffee.png'), require('../assets/images/butter.png'), require('../assets/images/cake.png'), require('../assets/images/bubble.png')]
+        },
+        creatorImages: [require('../assets/images/coffee.png'), require('../assets/images/cake.png'), require('../assets/images/butter.png'), require('../assets/images/bubble.png')],
+        playsCount: 950,
+        likes: 32,
+        dislikes: 1,
+        createdAt: Date.now() - (20 * 24 * 60 * 60 * 1000),
     }
   ],
   

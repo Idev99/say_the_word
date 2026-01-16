@@ -203,7 +203,7 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
     // Extract first 3 images for the stack
     const stackImages = [];
     if (challenge.creatorMode === 'CUSTOM') {
-        const allImages = Object.values(challenge.creatorRoundLayouts).flat().filter(img => img !== null) as string[];
+        const allImages = Object.values(challenge.creatorRoundLayouts).flat().filter(img => img !== null) as any[];
         stackImages.push(...allImages.slice(0, 3));
     } else {
         stackImages.push(...challenge.creatorImages.slice(0, 3));
@@ -216,13 +216,13 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
             {/* Stack Visual */}
             <View style={styles.stackContainer}>
                 <View style={[styles.stackCard, styles.stackCardBack, { transform: [{ rotate: '-10deg' }, { translateX: -10 }] }]}>
-                    <Image source={{ uri: stackImages[2] }} style={styles.stackImage} />
+                    <Image source={typeof stackImages[2] === 'string' ? { uri: stackImages[2] } : stackImages[2]} style={styles.stackImage} />
                 </View>
                 <View style={[styles.stackCard, styles.stackCardMid, { transform: [{ rotate: '-5deg' }, { translateX: -5 }] }]}>
-                    <Image source={{ uri: stackImages[1] }} style={styles.stackImage} />
+                    <Image source={typeof stackImages[1] === 'string' ? { uri: stackImages[1] } : stackImages[1]} style={styles.stackImage} />
                 </View>
                 <View style={[styles.stackCard, styles.stackCardTop]}>
-                    <Image source={{ uri: stackImages[0] }} style={styles.stackImage} />
+                    <Image source={typeof stackImages[0] === 'string' ? { uri: stackImages[0] } : stackImages[0]} style={styles.stackImage} />
                 </View>
             </View>
 

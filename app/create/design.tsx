@@ -135,7 +135,7 @@ export default function CreatorDesignStep() {
                 {currentLayout.map((uri, index) => (
                     <TouchableOpacity key={index} onPress={() => handleSlotPress(index)} style={styles.slot}>
                         {uri ? (
-                            <Image source={{ uri }} style={styles.slotImage} />
+                            <Image source={typeof uri === 'string' ? { uri } : uri} style={styles.slotImage} />
                         ) : (
                             <Text style={styles.slotPlaceholder}>{index + 1}</Text>
                         )}
@@ -161,7 +161,7 @@ export default function CreatorDesignStep() {
                         <ScrollView contentContainerStyle={styles.modalGallery}>
                             {creatorImages.map((uri, idx) => (
                                 <TouchableOpacity key={idx} onPress={() => handleImageSelect(uri)} style={styles.modalImageContainer}>
-                                    <Image source={{ uri }} style={styles.modalImage} />
+                                    <Image source={typeof uri === 'string' ? { uri } : uri} style={styles.modalImage} />
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
