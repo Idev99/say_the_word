@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 24,
         padding: 30,
-        width: '100%',
+        width: '90%',
         maxWidth: 380,
         alignItems: 'center',
         borderWidth: 4,
@@ -608,9 +608,9 @@ const styles = StyleSheet.create({
         color: '#FFD700',
     },
     resultsButtons: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         width: '100%',
-        gap: 15,
+        gap: 12,
     },
     resultButton: {
         flex: 1,

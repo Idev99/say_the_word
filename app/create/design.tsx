@@ -401,6 +401,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 20,
+        width: '90%',
+        maxWidth: 380,
         maxHeight: '70%',
     },
     modalTitle: {
@@ -446,8 +448,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-        width: '100%',
-        maxWidth: 400,
+        width: '90%',
+        maxWidth: 380,
     },
     confirmMessage: {
         fontSize: 16,
