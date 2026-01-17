@@ -103,12 +103,14 @@ export default function GameScreen() {
         }
     }, [id, loadLevel]);
 
-    // Auto-open options on first load
+    // Auto-open options when not playing
     useEffect(() => {
-        if (currentRound === 1 && !isPlaying) {
+        if (!isPlaying) {
             setOptionsVisible(true);
+        } else {
+            setOptionsVisible(false);
         }
-    }, []);
+    }, [isPlaying]);
 
     const toggleCamera = async () => {
         if (!permission?.granted) {
@@ -119,20 +121,13 @@ export default function GameScreen() {
         }
     };
 
-    const handleStart = () => {
-        if (currentRound === 1 && !isPlaying) {
-            setOptionsVisible(true);
-        } else if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
+    const handleConfirmPlay = () => {
+        if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
             restartGame();
-            setOptionsVisible(true);
+            startRound();
         } else {
             startRound();
         }
-    };
-
-    const handleConfirmPlay = () => {
-        setOptionsVisible(false);
-        startRound();
     };
 
     const handleBack = () => {
@@ -168,12 +163,6 @@ export default function GameScreen() {
                 <View style={styles.gameArea}>
                     <GridSystem key={currentRound} level={currentLevel} activeBeat={currentBeat} />
                 </View>
-
-                {!isPlaying && (
-                    <TouchableOpacity onPress={handleStart} style={styles.startButton}>
-                        <Text style={styles.startButtonText}>{t.start}</Text>
-                    </TouchableOpacity>
-                )}
             </ScrollView>
 
             {/* Game Options Modal */}
@@ -227,13 +216,7 @@ export default function GameScreen() {
                             <Text style={styles.confirmButtonText}>{t.startGame}</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => {
-                            if (currentRound === 1) {
-                                router.back();
-                            } else {
-                                setOptionsVisible(false);
-                            }
-                        }} style={styles.cancelButton}>
+                        <TouchableOpacity onPress={handleBack} style={styles.cancelButton}>
                             <Text style={styles.cancelText}>{translations[language].creator.cancel}</Text>
                         </TouchableOpacity>
                     </View>
