@@ -51,6 +51,12 @@ export const translations = {
                 statsTitle: "Your Stats",
                 getPaid: "Get Paid",
                 minAmount: "(50€ min)",
+                guest: {
+                    title: "Turn your challenges into CASH!",
+                    subtitle: "Publish your games, reach thousands of players, and win real gifts.",
+                    loginGoogle: "Sign in with Google",
+                    loginApple: "Sign in with Apple",
+                }
             }
         },
         creator: {
@@ -187,6 +193,12 @@ export const translations = {
                 statsTitle: "Tes Statistiques",
                 getPaid: "Se faire payer",
                 minAmount: "(50€ min)",
+                guest: {
+                    title: "Gagne de l'argent avec tes challenges !",
+                    subtitle: "Publie tes jeux, atteint des milliers de joueurs et gagne de vrais cadeaux.",
+                    loginGoogle: "Se connecter avec Google",
+                    loginApple: "Se connecter avec Apple",
+                }
             }
         },
         creator: {
@@ -322,6 +334,12 @@ export const translations = {
                 statsTitle: "Tus Estadísticas",
                 getPaid: "Cobrar",
                 minAmount: "(50€ min)",
+                guest: {
+                    title: "¡Gana dinero con tus retos!",
+                    subtitle: "Publica tus juegos, llega a miles de jugadores y gana premios reales.",
+                    loginGoogle: "Iniciar sesión con Google",
+                    loginApple: "Iniciar sesión con Apple",
+                }
             }
         },
         creator: {

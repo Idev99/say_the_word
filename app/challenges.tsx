@@ -32,7 +32,7 @@ const ICON_MAP: Record<string, any> = {
 
 export default function ChallengesScreen() {
     const router = useRouter();
-    const { language, communityChallenges, loadLevel, activeTab, setActiveTab, isLoggedIn, userChallengeIds } = useGameStore();
+    const { language, communityChallenges, loadLevel, activeTab, setActiveTab, isLoggedIn } = useGameStore();
     const t = translations[language].challenges;
 
     const [sortBy, setSortBy] = React.useState<'plays' | 'likes' | 'newest'>('plays');
@@ -62,11 +62,10 @@ export default function ChallengesScreen() {
             >
                 <Text style={styles.tabText}>{t.tabs.create}</Text>
             </TouchableOpacity>
-            {isLoggedIn && (
-                <TouchableOpacity onPress={() => setActiveTab('myChallenges' as any)} style={[styles.tab, activeTab === 'myChallenges' && styles.tabActive]}>
-                    <Text style={styles.tabText}>{t.tabs.myChallenges}</Text>
-                </TouchableOpacity>
-            )}
+            {/* Studio Tab is now always visible */}
+            <TouchableOpacity onPress={() => setActiveTab('myChallenges')} style={[styles.tab, activeTab === 'myChallenges' && styles.tabActive]}>
+                <Text style={styles.tabText}>{t.tabs.myChallenges}</Text>
+            </TouchableOpacity>
         </View>
     );
 
@@ -160,8 +159,60 @@ export default function ChallengesScreen() {
                 ) : (
                     <MyChallengesView />
                 )}
+                {/* 
+                ) : isLoggedIn ? (
+                    <MyChallengesView />
+                ) : (
+                    <GuestStudioView />
+                )} 
+                */}
             </ScrollView>
         </SafeAreaView>
+    );
+}
+
+function GuestStudioView() {
+    const { language, login } = useGameStore();
+    const t = translations[language].challenges;
+    const gt = (t as any).guest || {};
+
+    return (
+        <View style={styles.guestContainer}>
+            <View style={styles.guestIconContainer}>
+                <Ionicons name="rocket" size={80} color="#FFD700" />
+                <View style={styles.moneyBadge}>
+                    <Text style={styles.moneyBadgeText}>€€€</Text>
+                </View>
+            </View>
+
+            <Text style={styles.guestTitle}>{gt.title}</Text>
+            <Text style={styles.guestSubtitle}>{gt.subtitle}</Text>
+
+            <View style={styles.authButtons}>
+                <TouchableOpacity style={[styles.authButton, styles.googleButton]} onPress={() => login()}>
+                    <Ionicons name="logo-google" size={24} color="white" />
+                    <Text style={styles.authButtonText}>{gt.loginGoogle}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.authButton, styles.appleButton]}>
+                    <Ionicons name="logo-apple" size={24} color="white" />
+                    <Text style={styles.authButtonText}>{gt.loginApple}</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.guestBenefitRow}>
+                <View style={styles.benefitIcon}>
+                    <Ionicons name="trending-up" size={20} color="#6BF178" />
+                </View>
+                <Text style={styles.benefitText}>Grow your audience</Text>
+            </View>
+            <View style={styles.guestBenefitRow}>
+                <View style={styles.benefitIcon}>
+                    <Ionicons name="gift" size={20} color="#FF508E" />
+                </View>
+                <Text style={styles.benefitText}>Earn real world rewards</Text>
+            </View>
+        </View>
     );
 }
 
@@ -189,22 +240,23 @@ function MyChallengesView() {
     const reachedTiers = tiers.filter(v => totalViews >= v * 1000);
     const latestReached = reachedTiers.length > 0 ? reachedTiers[reachedTiers.length - 1] : 0;
 
-    // Logic for stepper: show reached progress
     const stepperTiers = reachedTiers.length >= 3
         ? reachedTiers.slice(-3)
         : tiers.slice(0, 3);
 
+    /* 
     const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] });
     const rotate = anim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: ['0deg', '-15deg', '0deg', '15deg', '0deg'] });
     const opacity = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 0.7, 1] });
 
-    // Inverted animations for the Euro icon
     const scaleInv = anim.interpolate({ inputRange: [0, 1], outputRange: [1.3, 1] });
     const rotateInv = anim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: ['0deg', '15deg', '0deg', '-15deg', '0deg'] });
     const opacityInv = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.7, 1, 0.7] });
+    */
 
     return (
         <View>
+            {/* 
             <TouchableOpacity style={styles.rewardsBanner} onPress={() => setModalVisible(true)}>
                 <View style={styles.rewardsHeader}>
                     <Animated.View style={{ transform: [{ scale }, { rotate }], opacity }}>
@@ -228,7 +280,7 @@ function MyChallengesView() {
                         return (
                             <View key={i} style={styles.stepGroup}>
                                 <View style={[styles.stepDot, isUnlocked && styles.stepDotActive]}>
-                                    <Text style={[styles.stepText, isUnlocked && { color: 'black' }]}>{v}€</Text>
+                                    <Text style={[styles.stepText, isUnlocked && {color: 'black'}]}>{v}€</Text>
                                     {isUnlocked && <Ionicons name="checkmark" size={10} color="black" style={styles.checkIcon} />}
                                 </View>
                                 {i < stepperTiers.length - 1 && (
@@ -242,6 +294,7 @@ function MyChallengesView() {
                     </View>
                 </View>
             </TouchableOpacity>
+            */}
 
             <View style={[styles.sectionHeader, { backgroundColor: '#6BF178', width: '100%', marginBottom: 15 }]}>
                 <Text style={styles.sectionHeaderText}>{rt.statsTitle}</Text>
@@ -260,6 +313,7 @@ function MyChallengesView() {
                 ))}
             </View>
 
+            {/* 
             <Modal visible={modalVisible} transparent={true} animationType="slide">
                 <View style={styles.modalOverlay}>
                     <View style={styles.premiumModalContent}>
@@ -268,7 +322,7 @@ function MyChallengesView() {
                         </TouchableOpacity>
 
                         <Text style={styles.premiumModalTitle}>{rt.totalTiers}</Text>
-
+                        
                         <ScrollView style={{ maxHeight: SCREEN_HEIGHT * 0.4, width: '100%', marginBottom: 15 }} showsVerticalScrollIndicator={false}>
                             {tiers.map((v, j) => {
                                 const target = v * 1000;
@@ -311,7 +365,7 @@ function MyChallengesView() {
                         </View>
 
                         <View style={styles.modalActionRow}>
-                            <TouchableOpacity
+                            <TouchableOpacity 
                                 style={[styles.getPaidButton, latestReached < 50 && styles.getPaidDisabled]}
                                 disabled={latestReached < 50}
                             >
@@ -326,6 +380,7 @@ function MyChallengesView() {
                     </View>
                 </View>
             </Modal>
+            */}
         </View>
     );
 }
@@ -634,4 +689,108 @@ const styles = StyleSheet.create({
     minAmountText: { fontSize: 10, color: 'rgba(255,255,255,0.7)', fontWeight: '700' },
     okButton: { flex: 1, backgroundColor: '#FF508E', borderRadius: 15, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', shadowColor: '#FF508E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8 },
     okButtonText: { fontSize: 18, fontWeight: '900', color: 'white' },
+
+    // Guest Studio Styles
+    guestContainer: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 30,
+        backgroundColor: '#f8f8f8',
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: '#eee',
+        paddingHorizontal: 20,
+    },
+    guestIconContainer: {
+        marginBottom: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    moneyBadge: {
+        position: 'absolute',
+        bottom: -5,
+        right: -10,
+        backgroundColor: '#6BF178',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: 'black',
+        transform: [{ rotate: '15deg' }],
+    },
+    moneyBadgeText: {
+        fontSize: 12,
+        fontWeight: '900',
+        color: 'black',
+    },
+    guestTitle: {
+        fontSize: 26,
+        fontWeight: '900',
+        textAlign: 'center',
+        color: 'black',
+        marginBottom: 10,
+    },
+    guestSubtitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        textAlign: 'center',
+        color: '#666',
+        marginBottom: 30,
+        lineHeight: 22,
+    },
+    authButtons: {
+        width: '100%',
+        gap: 12,
+        marginBottom: 40,
+    },
+    authButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 15,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: 'black',
+        shadowColor: '#000',
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        gap: 10,
+    },
+    googleButton: {
+        backgroundColor: '#4285F4',
+    },
+    appleButton: {
+        backgroundColor: '#000',
+    },
+    authButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    guestBenefitRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 15,
+        gap: 15,
+        backgroundColor: 'white',
+        padding: 12,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    benefitIcon: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#f0f0f0',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    benefitText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#333',
+    },
 });

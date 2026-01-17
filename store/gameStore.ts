@@ -53,10 +53,11 @@ interface GameStore {
   endRoundIntro: () => void;
   stopGame: () => void;
   restartGame: () => void;
-  setActiveTab: (tab: 'featured' | 'community') => void;
+  setActiveTab: (tab: 'featured' | 'community' | 'myChallenges') => void;
   setShowImageNames: (show: boolean) => void;
   completeGame: () => void;
   rateChallenge: (id: string, stars: number) => void;
+  login: () => void;
 
   // Creator State
   creatorName: string;
@@ -94,7 +95,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   introAnimationSpeed: 1.15,
   activeTab: 'featured',
   showImageNames: false,
-  isLoggedIn: true,
+  isLoggedIn: false,
   userChallengeIds: ['comm-1', 'comm-2'], // Mock user challenges
 
   communityChallenges: [
@@ -417,6 +418,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
       return { communityChallenges: updatedChallenges };
   }),
+  login: () => set({ isLoggedIn: true }),
   setBpm: (bpm: number) => set({ bpm }),
   setIntroSpeed: (speed: number) => set({ introSpeed: speed }),
   setIntroAnimationSpeed: (speed: number) => set({ introAnimationSpeed: speed }),
