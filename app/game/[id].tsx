@@ -83,7 +83,7 @@ const MOCK_LEVELS: Record<string, LevelData> = {
 export default function GameScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame, showImageNames, setShowImageNames, gameState, rateChallenge } = useGameStore();
+    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame, setGameState, showImageNames, setShowImageNames, gameState, rateChallenge } = useGameStore();
     const { playSound, stopAllSounds } = useSoundEffects();
     const t = translations[language].game;
 
@@ -108,14 +108,14 @@ export default function GameScreen() {
         }
     }, [id, loadLevel]);
 
-    // Auto-open options when not playing
+    // Auto-open options only on initial entry or when explicitly requested
     useEffect(() => {
-        if (!isPlaying) {
+        if (!isPlaying && gameState === 'MENU') {
             setOptionsVisible(true);
         } else {
             setOptionsVisible(false);
         }
-    }, [isPlaying]);
+    }, [isPlaying, gameState]);
 
     const toggleCamera = async () => {
         if (!permission?.granted) {
@@ -128,6 +128,7 @@ export default function GameScreen() {
 
     const handleConfirmPlay = async () => {
         setOptionsVisible(false);
+        setGameState('PLAYING');
 
         // Start countdown
         const sequence = [
@@ -186,9 +187,13 @@ export default function GameScreen() {
         router.back();
     };
 
-    const handleRetry = () => {
+    const handleRetryDirect = () => {
         restartGame();
-        setOptionsVisible(true);
+        handleConfirmPlay();
+    };
+
+    const handleRetryWithOptions = () => {
+        restartGame();
     };
 
     const handleRate = (stars: number) => {
@@ -216,15 +221,23 @@ export default function GameScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* Camera Background - Mobile Only */}
-            {isCameraOn && Platform.OS !== 'web' && (
-                <CameraView style={StyleSheet.absoluteFillObject} facing="front" />
-            )}
 
-            <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollView}>
-                <View style={styles.gameArea}>
+            <ScrollView
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    isCameraOn ? styles.scrollContentCameraOn : styles.scrollContentCameraOff
+                ]}
+                style={styles.scrollView}
+            >
+                <View style={[styles.gameArea, !isCameraOn && { aspectRatio: 1, justifyContent: 'center' }]}>
                     <GridSystem key={currentRound} level={currentLevel} activeBeat={currentBeat} />
                 </View>
+
+                {isCameraOn && (
+                    <View style={styles.cameraContainer}>
+                        <CameraView style={styles.cameraPreview} facing="front" />
+                    </View>
+                )}
             </ScrollView>
 
             {/* Game Options Modal */}
@@ -303,14 +316,18 @@ export default function GameScreen() {
                         </View>
 
                         <View style={styles.resultsButtons}>
-                            <TouchableOpacity onPress={handleBack} style={[styles.resultButton, styles.backBtn]}>
-                                <Text style={styles.resultButtonText}>{t.backToMenu}</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity onPress={handleRetry} style={[styles.resultButton, styles.retryBtn]}>
+                            <TouchableOpacity onPress={handleRetryDirect} style={[styles.resultButton, styles.retryBtn]}>
                                 <Text style={styles.resultButtonText}>{t.retry}</Text>
                             </TouchableOpacity>
+
+                            <TouchableOpacity onPress={handleRetryWithOptions} style={[styles.resultButton, styles.optionBtn]}>
+                                <Text style={styles.resultButtonText}>{t.retryWithOptions}</Text>
+                            </TouchableOpacity>
                         </View>
+
+                        <TouchableOpacity onPress={handleBack} style={styles.resultsBackFull}>
+                            <Text style={styles.resultsBackFullText}>{t.backToMenu}</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
@@ -352,12 +369,20 @@ const styles = StyleSheet.create({
     scrollContent: {
         flexGrow: 1,
         alignItems: 'center',
+    },
+    scrollContentCameraOn: {
+        paddingTop: 140,
+        paddingBottom: 20,
+        justifyContent: 'flex-start',
+    },
+    scrollContentCameraOff: {
+        paddingTop: 0,
+        paddingBottom: 0,
         justifyContent: 'center',
-        paddingVertical: 100, // Space for header
     },
     header: {
         position: 'absolute',
-        top: 50,
+        top: 80,
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -373,10 +398,28 @@ const styles = StyleSheet.create({
     },
     gameArea: {
         width: '100%',
-        maxWidth: 500, // Constrain width for better layout on wide screens
-        aspectRatio: 1,
-        justifyContent: 'center',
+        maxWidth: 500,
         alignItems: 'center',
+        marginBottom: 5,
+    },
+    cameraContainer: {
+        width: '80%',
+        maxWidth: 300,
+        aspectRatio: 4 / 3, // slightly more compact
+        backgroundColor: '#000',
+        borderRadius: 20,
+        borderWidth: 4,
+        borderColor: 'black',
+        overflow: 'hidden',
+        marginTop: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 6, height: 6 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 8,
+    },
+    cameraPreview: {
+        flex: 1,
     },
     startButton: {
         marginTop: 50,
@@ -581,7 +624,22 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5F5F5',
     },
     retryBtn: {
-        backgroundColor: '#6BF178',
+        backgroundColor: '#FFEB3B', // Yellow for main action
+    },
+    optionBtn: {
+        backgroundColor: '#6BF178', // Green for options
+    },
+    resultsBackFull: {
+        marginTop: 15,
+        width: '100%',
+        padding: 12,
+        alignItems: 'center',
+    },
+    resultsBackFullText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '700',
+        textDecorationLine: 'underline',
     },
     resultButtonText: {
         fontSize: 16,

@@ -111,6 +111,7 @@ export const translations = {
             wellDone: "Well done!",
             rateChallenge: "Rate this challenge",
             retry: "Retry",
+            retryWithOptions: "Retry with Options",
             backToMenu: "Exit",
         },
         imageNames: {
@@ -252,6 +253,7 @@ export const translations = {
             wellDone: "Bien joué !",
             rateChallenge: "Note ce défi",
             retry: "Réessayer",
+            retryWithOptions: "Réessayer avec options",
             backToMenu: "Quitter",
         },
         imageNames: {
@@ -393,6 +395,7 @@ export const translations = {
             wellDone: "¡Bien hecho!",
             rateChallenge: "Calificar este reto",
             retry: "Reintentar",
+            retryWithOptions: "Reintentar con opciones",
             backToMenu: "Salir",
         },
         imageNames: {

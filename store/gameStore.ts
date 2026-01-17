@@ -454,8 +454,9 @@ export const useGameStore = create<GameStore>()(
     return {
       currentRound: 1,
       currentBeat: -1,
-      isPlaying: true,
-      isRoundIntro: true,
+      isPlaying: false,
+      gameState: 'MENU',
+      isRoundIntro: false,
       currentLevel: state.currentLevel ? { ...state.currentLevel, images: nextImages } : null
     };
   }),
