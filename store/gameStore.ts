@@ -7,6 +7,7 @@ export interface LevelData {
   id: string;
   name: string;
   images: any[]; // URLs or local paths
+  imageNames?: Record<string, string>; // path/uri -> name
   rounds: number;
 }
 
@@ -32,6 +33,7 @@ interface GameStore {
   introSpeed: number;
   introAnimationSpeed: number;
   activeTab: 'featured' | 'community';
+  showImageNames: boolean;
 
   // Community State
   communityChallenges: CommunityChallenge[];
@@ -50,10 +52,12 @@ interface GameStore {
   stopGame: () => void;
   restartGame: () => void;
   setActiveTab: (tab: 'featured' | 'community') => void;
+  setShowImageNames: (show: boolean) => void;
 
   // Creator State
   creatorName: string;
   creatorImages: any[];
+  creatorImageNames: Record<string, string>;
   creatorMode: 'RANDOM' | 'CUSTOM';
   creatorRoundLayouts: Record<number, (any | null)[]>; // Round -> Array of 8 images (or null)
 
@@ -61,6 +65,7 @@ interface GameStore {
   setCreatorName: (name: string) => void;
   addCreatorImage: (uri: string) => void;
   removeCreatorImage: (index: number) => void;
+  setCreatorImageName: (uri: string, name: string) => void;
   setCreatorMode: (mode: 'RANDOM' | 'CUSTOM') => void;
   setCreatorRoundSlot: (round: number, slotIndex: number, imageUri: string) => void;
   fillRandomSlots: () => void;
@@ -77,19 +82,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   currentLevel: null,
   currentRound: 1,
   currentBeat: -1,
-  bpm: 210, // Default BPM
-
+  bpm: 210,
   isPlaying: false,
   isRoundIntro: false,
   language: 'EN',
   introSpeed: 1.15,
   introAnimationSpeed: 1.15,
   activeTab: 'featured',
+  showImageNames: false,
 
   communityChallenges: [
     {
         id: 'comm-1',
-        name: 'French Streamers',
+        name: 'community.challenge1.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -129,10 +134,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
         likes: 1205,
         dislikes: 42,
         createdAt: Date.now() - (2 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/billy.png')]: "billy",
+            [require('../assets/images/squeezie.png')]: "squeezie",
+            [require('../assets/images/biaggi.png')]: "biaggi"
+        }
     },
     {
         id: 'comm-2',
-        name: 'Foodie Fest',
+        name: 'community.challenge2.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -148,10 +158,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         likes: 150,
         dislikes: 11,
         createdAt: Date.now() - (25 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/steak.png')]: "steak",
+            [require('../assets/images/watermelon.png')]: "watermelon",
+            [require('../assets/images/cake.png')]: "cake",
+            [require('../assets/images/coffee.png')]: "coffee"
+        }
     },
     {
         id: 'comm-3',
-        name: 'Vibration',
+        name: 'community.challenge3.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -167,10 +183,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
         likes: 6,
         dislikes: 2,
         createdAt: Date.now() - (30 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/msn.png')]: "msn",
+            [require('../assets/images/piscine.png')]: "piscine",
+            [require('../assets/images/scene.png')]: "scene"
+        }
     },
     {
         id: 'comm-4',
-        name: 'Kids Fun',
+        name: 'community.challenge4.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -185,11 +206,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playsCount: 120,
         likes: 12,
         dislikes: 0,
-        createdAt: Date.now() - (1 * 24 * 60 * 60 * 1000),
+        createdAt: Date.now() - (35 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/baby.png')]: "baby",
+            [require('../assets/images/bird.png')]: "bird",
+            [require('../assets/images/cat.png')]: "cat"
+        }
     },
     {
         id: 'comm-5',
-        name: 'Rainbow Dash',
+        name: 'community.challenge5.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -205,10 +231,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         likes: 88,
         dislikes: 2,
         createdAt: Date.now() - (5 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/red.png')]: "red",
+            [require('../assets/images/blue.png')]: "blue",
+            [require('../assets/images/green.png')]: "green",
+            [require('../assets/images/yellow.png')]: "yellow"
+        }
     },
     {
         id: 'comm-6',
-        name: 'World Tour',
+        name: 'community.challenge6.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -224,10 +256,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         likes: 45,
         dislikes: 3,
         createdAt: Date.now() - (10 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/usa.png')]: "usa",
+            [require('../assets/images/china.png')]: "china",
+            [require('../assets/images/russia.png')]: "russia",
+            [require('../assets/images/ukraine.png')]: "ukraine"
+        }
     },
     {
         id: 'comm-7',
-        name: 'Number Mania',
+        name: 'community.challenge7.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -243,10 +281,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         likes: 210,
         dislikes: 5,
         createdAt: Date.now() - (15 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/1.png')]: "1",
+            [require('../assets/images/2.png')]: "2",
+            [require('../assets/images/3.png')]: "3",
+            [require('../assets/images/4.png')]: "4"
+        }
     },
     {
         id: 'comm-8',
-        name: 'Coffee Break',
+        name: 'community.challenge8.name',
         rounds: 5,
         images: [],
         creatorMode: 'CUSTOM',
@@ -262,6 +306,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         likes: 32,
         dislikes: 1,
         createdAt: Date.now() - (20 * 24 * 60 * 60 * 1000),
+        imageNames: {
+            [require('../assets/images/coffee.png')]: "coffee",
+            [require('../assets/images/cake.png')]: "cake",
+            [require('../assets/images/butter.png')]: "butter",
+            [require('../assets/images/bubble.png')]: "bubble"
+        }
     }
   ],
   
@@ -269,6 +319,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   
   setLanguage: (lang) => set({ language: lang }),
   setGameState: (state) => set({ gameState: state }),
+  setShowImageNames: (show) => set({ showImageNames: show }),
   loadLevel: (level) => set((state) => {
     const isCommunity = 'creatorMode' in level;
     
@@ -360,12 +411,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // Creator Init
   creatorName: '',
   creatorImages: [],
+  creatorImageNames: {},
   creatorMode: 'RANDOM',
   creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) },
 
   setCreatorName: (name) => set({ creatorName: name }),
   addCreatorImage: (uri) => set((state) => ({ creatorImages: [...state.creatorImages, uri] })),
-  removeCreatorImage: (index) => set((state) => ({ creatorImages: state.creatorImages.filter((_, i) => i !== index) })),
+  removeCreatorImage: (index) => set((state) => {
+      const uri = state.creatorImages[index];
+      const newNames = { ...state.creatorImageNames };
+      delete newNames[uri];
+      return { 
+          creatorImages: state.creatorImages.filter((_, i) => i !== index),
+          creatorImageNames: newNames
+      };
+  }),
+  setCreatorImageName: (uri, name) => set((state) => ({
+      creatorImageNames: { ...state.creatorImageNames, [uri]: name }
+  })),
   setCreatorMode: (mode) => set({ creatorMode: mode }),
   setCreatorRoundSlot: (round, slot, uri) => set((state) => {
       const currentRoundLayout = [...(state.creatorRoundLayouts[round] || Array(8).fill(null))];
@@ -401,13 +464,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
           likes: 0,
           dislikes: 0,
           createdAt: Date.now(),
+          imageNames: state.creatorImageNames,
       };
       
       return {
           communityChallenges: [newChallenge, ...state.communityChallenges],
       };
   }),
-  resetCreator: () => set({ creatorName: '', creatorImages: [], creatorMode: 'RANDOM', creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) } }),
+  resetCreator: () => set({ creatorName: '', creatorImages: [], creatorImageNames: {}, creatorMode: 'RANDOM', creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) } }),
 
   loadCustomLevel: () => set((state) => {
     // Generate Level Data from Creator State
@@ -416,6 +480,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       name: state.creatorName || 'My Challenge',
       rounds: 5,
       images: [], 
+      imageNames: state.creatorImageNames,
     };
     
     const r1Images = state.creatorMode === 'CUSTOM' 

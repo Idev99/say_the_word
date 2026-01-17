@@ -1,7 +1,8 @@
-import { View, Image, StyleSheet, Animated, Easing } from 'react-native';
+import { View, Image, StyleSheet, Animated, Easing, Text } from 'react-native';
 import { LevelData, useGameStore } from '../../store/gameStore';
 import { useEffect, useRef } from 'react';
 import { useSoundEffects } from '../../hooks/useSoundEffects';
+import { translations } from '../../constants/translations';
 
 const GAP = 10;
 
@@ -11,30 +12,24 @@ interface GridSystemProps {
 }
 
 export default function GridSystem({ level, activeBeat }: GridSystemProps) {
-    const { isRoundIntro, endRoundIntro, currentRound, introSpeed, introAnimationSpeed } = useGameStore();
+    const { isRoundIntro, endRoundIntro, currentRound, introSpeed, introAnimationSpeed, showImageNames, language } = useGameStore();
     const { playSound } = useSoundEffects();
+    // ... rest of the setup
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
     const playedIntroForRound = useRef<string | null>(null);
 
-    // Create animated values for each possible card (max 8)
     const animValues = useRef([...Array(8)].map(() => new Animated.Value(0))).current;
 
     useEffect(() => {
-        // Unique key for this specific round's intro to prevent re-runs within the same round
+        // ... (animation logic remains same)
         const introKey = `${level.id}-${currentRound}`;
 
         if (isRoundIntro && playedIntroForRound.current !== introKey) {
             playedIntroForRound.current = introKey;
-
-            // Initialize animations
             animValues.forEach(v => v.setValue(0));
             timeoutsRef.current.forEach(clearTimeout);
             timeoutsRef.current = [];
-
-            // Start intro sound
             playSound('monmagaietsifflet2', introSpeed);
-
-            // Stagger animation for cards
             const BASE_STAGGER = 250;
             const STAGGER_MS = BASE_STAGGER / introAnimationSpeed;
             const DURATION_MS = 500 / introAnimationSpeed;
@@ -51,16 +46,13 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
                 timeoutsRef.current.push(t);
             });
 
-            // Signal end of intro after ALL card animations finish
             const totalAnimationTime = ((level.images.length - 1) * STAGGER_MS) + DURATION_MS;
             const endTimeout = setTimeout(() => {
                 endRoundIntro();
             }, totalAnimationTime);
             timeoutsRef.current.push(endTimeout);
         } else if (!isRoundIntro) {
-            // Ensure all visible if not in intro
             animValues.forEach(v => v.setValue(1));
-            // Clear timeouts if we leave intro early
             timeoutsRef.current.forEach(clearTimeout);
         }
 
@@ -73,28 +65,37 @@ export default function GridSystem({ level, activeBeat }: GridSystemProps) {
         <View style={styles.grid}>
             {level.images.map((img, index) => {
                 const isActive = index === activeBeat;
-
-                // Interpolations for entering effect
                 const translateY = animValues[index].interpolate({
                     inputRange: [0, 1],
-                    outputRange: [50, 0] // Slide up from 50px down
+                    outputRange: [50, 0]
                 });
                 const opacity = animValues[index];
 
+                // Find image name
+                const lookupKey = img?.toString();
+                const displayName = (level.imageNames && lookupKey) ? level.imageNames[lookupKey] : '';
+
+                // Translate if possible
+                const localizedName = (translations[language] as any).imageNames?.[displayName] || displayName;
+
                 return (
-                    <Animated.View
-                        key={index}
-                        style={[
-                            styles.cardContainer,
-                            {
-                                opacity: isRoundIntro ? opacity : (index <= activeBeat ? 1 : 0.4),
-                                transform: [{ translateY }]
-                            },
-                            isActive && !isRoundIntro && styles.activeCard // Only show green border if intro finished
-                        ]}
-                    >
-                        <Image source={typeof img === 'string' ? { uri: img } : img} style={styles.image} resizeMode="cover" />
-                    </Animated.View>
+                    <View key={index} style={styles.cell}>
+                        {showImageNames && localizedName ? (
+                            <Text style={styles.imageName} numberOfLines={1}>{localizedName}</Text>
+                        ) : null}
+                        <Animated.View
+                            style={[
+                                styles.cardContainer,
+                                {
+                                    opacity: isRoundIntro ? opacity : (index <= activeBeat ? 1 : 0.4),
+                                    transform: [{ translateY }]
+                                },
+                                isActive && !isRoundIntro && styles.activeCard
+                            ]}
+                        >
+                            <Image source={typeof img === 'string' ? { uri: img } : img} style={styles.image} resizeMode="cover" />
+                        </Animated.View>
+                    </View>
                 );
             })}
         </View>
@@ -106,12 +107,28 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        gap: 10,
+        gap: 15, // Increased slightly for names
         width: '100%',
         padding: 10,
     },
+    cell: {
+        width: '21%',
+        alignItems: 'center',
+    },
+    imageName: {
+        fontSize: 10,
+        fontWeight: '900',
+        marginBottom: 4,
+        textAlign: 'center',
+        width: '100%',
+        textTransform: 'uppercase',
+        color: '#FF508E',
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        borderRadius: 4,
+        paddingVertical: 1,
+    },
     cardContainer: {
-        width: '21%', // 21 * 4 = 84%, leaves 16% for gaps/padding. Plenty safe.
+        width: '100%',
         aspectRatio: 1,
         backgroundColor: 'white',
         borderWidth: 2,
@@ -126,7 +143,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.8,
         shadowRadius: 10,
-        elevation: 10, // Android shadow
+        elevation: 10,
     },
     image: {
         width: '100%',

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Modal, Switch } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore, LevelData } from '../../store/gameStore';
 import { useBeatController } from '../../hooks/useBeatController';
@@ -19,7 +19,13 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             require('../../assets/images/butter.png'),
             require('../../assets/images/bubble.png'),
             require('../../assets/images/baby.png'),
-        ]
+        ],
+        imageNames: {
+            [require('../../assets/images/bird.png')]: "bird",
+            [require('../../assets/images/butter.png')]: "butter",
+            [require('../../assets/images/bubble.png')]: "bubble",
+            [require('../../assets/images/baby.png')]: "baby",
+        }
     },
     'numbers': {
         id: 'numbers',
@@ -30,7 +36,13 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             require('../../assets/images/2.png'),
             require('../../assets/images/3.png'),
             require('../../assets/images/4.png'),
-        ]
+        ],
+        imageNames: {
+            [require('../../assets/images/1.png')]: "1",
+            [require('../../assets/images/2.png')]: "2",
+            [require('../../assets/images/3.png')]: "3",
+            [require('../../assets/images/4.png')]: "4",
+        }
     },
     'colors': {
         id: 'colors',
@@ -41,7 +53,13 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             require('../../assets/images/blue.png'),
             require('../../assets/images/green.png'),
             require('../../assets/images/yellow.png'),
-        ]
+        ],
+        imageNames: {
+            [require('../../assets/images/red.png')]: "red",
+            [require('../../assets/images/blue.png')]: "blue",
+            [require('../../assets/images/green.png')]: "green",
+            [require('../../assets/images/yellow.png')]: "yellow",
+        }
     },
     'country': {
         id: 'country',
@@ -52,19 +70,27 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             require('../../assets/images/ukraine.png'),
             require('../../assets/images/usa.png'),
             require('../../assets/images/china.png'),
-        ]
+        ],
+        imageNames: {
+            [require('../../assets/images/russia.png')]: "russia",
+            [require('../../assets/images/ukraine.png')]: "ukraine",
+            [require('../../assets/images/usa.png')]: "usa",
+            [require('../../assets/images/china.png')]: "china",
+        }
     }
 };
 
 export default function GameScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame } = useGameStore();
+    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame, showImageNames, setShowImageNames } = useGameStore();
     const { playSound, stopAllSounds } = useSoundEffects();
     const t = translations[language].game;
 
     const [permission, requestPermission] = useCameraPermissions();
     const [isCameraOn, setIsCameraOn] = useState(false);
+    const [optionsVisible, setOptionsVisible] = useState(false);
+    const [difficulty, setDifficulty] = useState('normal');
 
     // Initialize Loop
     useBeatController();
@@ -72,27 +98,41 @@ export default function GameScreen() {
     useEffect(() => {
         if (id === 'custom') {
             // Already loaded via loadCustomLevel() in the creator screens
-            // Just ensure we don't overwrite it
         } else if (typeof id === 'string' && MOCK_LEVELS[id]) {
             loadLevel(MOCK_LEVELS[id]);
         }
     }, [id, loadLevel]);
 
+    // Auto-open options on first load
+    useEffect(() => {
+        if (currentRound === 1 && !isPlaying) {
+            setOptionsVisible(true);
+        }
+    }, []);
+
     const toggleCamera = async () => {
         if (!permission?.granted) {
             const { granted } = await requestPermission();
-            if (granted) setIsCameraOn(!isCameraOn);
+            if (granted) setIsCameraOn(true);
         } else {
             setIsCameraOn(!isCameraOn);
         }
     };
 
     const handleStart = () => {
-        if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
+        if (currentRound === 1 && !isPlaying) {
+            setOptionsVisible(true);
+        } else if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
             restartGame();
+            setOptionsVisible(true);
         } else {
             startRound();
         }
+    };
+
+    const handleConfirmPlay = () => {
+        setOptionsVisible(false);
+        startRound();
     };
 
     const handleBack = () => {
@@ -135,6 +175,70 @@ export default function GameScreen() {
                     </TouchableOpacity>
                 )}
             </ScrollView>
+
+            {/* Game Options Modal */}
+            <Modal visible={optionsVisible} transparent={true} animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{t.optionsTitle}</Text>
+
+                        <View style={styles.optionRow}>
+                            <Text style={styles.optionText}>{t.showNames}</Text>
+                            <Switch
+                                value={showImageNames}
+                                onValueChange={setShowImageNames}
+                                trackColor={{ false: '#767577', true: '#FF508E' }}
+                                thumbColor={showImageNames ? '#fff' : '#f4f3f4'}
+                            />
+                        </View>
+
+                        <View style={styles.optionRow}>
+                            <Text style={styles.optionText}>{t.showCamera}</Text>
+                            <Switch
+                                value={isCameraOn}
+                                onValueChange={toggleCamera}
+                                trackColor={{ false: '#767577', true: '#FF508E' }}
+                                thumbColor={isCameraOn ? '#fff' : '#f4f3f4'}
+                            />
+                        </View>
+
+                        <Text style={styles.difficultyLabel}>{t.difficulty}</Text>
+                        <View style={styles.difficultyContainer}>
+                            {['easy', 'normal', 'hard'].map((level) => (
+                                <TouchableOpacity
+                                    key={level}
+                                    onPress={() => setDifficulty(level)}
+                                    style={[
+                                        styles.difficultyButton,
+                                        difficulty === level && styles.difficultyButtonActive
+                                    ]}
+                                >
+                                    <Text style={[
+                                        styles.difficultyText,
+                                        difficulty === level && styles.difficultyTextActive
+                                    ]}>
+                                        {(t as any)[`difficulty${level.charAt(0).toUpperCase() + level.slice(1)}`]}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        <TouchableOpacity onPress={handleConfirmPlay} style={styles.confirmButton}>
+                            <Text style={styles.confirmButtonText}>{t.startGame}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => {
+                            if (currentRound === 1) {
+                                router.back();
+                            } else {
+                                setOptionsVisible(false);
+                            }
+                        }} style={styles.cancelButton}>
+                            <Text style={styles.cancelText}>{translations[language].creator.cancel}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -201,5 +305,121 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontWeight: 'bold',
-    }
+    },
+    // New Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 24,
+        padding: 30,
+        width: '100%',
+        maxWidth: 380,
+        alignItems: 'center',
+        borderWidth: 4,
+        borderColor: 'black',
+        shadowColor: '#000',
+        shadowOffset: { width: 6, height: 6 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 8,
+    },
+    modalTitle: {
+        fontSize: 28,
+        fontWeight: '900',
+        marginBottom: 30,
+        textAlign: 'center',
+        color: '#FF508E',
+        textTransform: 'uppercase',
+    },
+    optionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 20,
+        backgroundColor: '#F5F5F5',
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 2,
+        borderColor: '#000',
+    },
+    optionText: {
+        fontSize: 14,
+        fontWeight: '800',
+        color: '#333',
+        maxWidth: '70%',
+    },
+    difficultyLabel: {
+        fontSize: 16,
+        fontWeight: '900',
+        alignSelf: 'flex-start',
+        marginBottom: 10,
+        marginTop: 10,
+        textTransform: 'uppercase',
+    },
+    difficultyContainer: {
+        flexDirection: 'row',
+        width: '100%',
+        justifyContent: 'space-between',
+        marginBottom: 30,
+        gap: 8,
+    },
+    difficultyButton: {
+        flex: 1,
+        paddingVertical: 10,
+        backgroundColor: 'white',
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    difficultyButtonActive: {
+        backgroundColor: '#FFEB3B',
+    },
+    difficultyText: {
+        fontSize: 12,
+        fontWeight: '800',
+        color: 'black',
+    },
+    difficultyTextActive: {
+        fontWeight: '900',
+    },
+    confirmButton: {
+        width: '100%',
+        padding: 20,
+        backgroundColor: '#6BF178',
+        borderRadius: 16,
+        alignItems: 'center',
+        borderWidth: 3,
+        borderColor: 'black',
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 5,
+    },
+    confirmButtonText: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: 'black',
+        textTransform: 'uppercase',
+    },
+    cancelButton: {
+        width: '100%',
+        padding: 10,
+        alignItems: 'center',
+    },
+    cancelText: {
+        fontSize: 16,
+        color: '#666',
+        fontWeight: '700',
+        textDecorationLine: 'underline',
+    },
 });

@@ -1,25 +1,44 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { useGameStore } from '../../store/gameStore';
 import { translations } from '../../constants/translations';
 
 export default function CreatorStep1() {
     const router = useRouter();
-    const { creatorImages, addCreatorImage, removeCreatorImage, language } = useGameStore();
+    const { creatorImages, creatorImageNames, addCreatorImage, removeCreatorImage, setCreatorImageName, language } = useGameStore();
     const t = translations[language].creator;
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [currentUri, setCurrentUri] = useState('');
+    const [imageName, setImageName] = useState('');
 
     const handlePickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true, // Crop square?
+            allowsEditing: true,
             aspect: [1, 1],
             quality: 1,
         });
 
         if (!result.canceled) {
-            addCreatorImage(result.assets[0].uri);
+            setCurrentUri(result.assets[0].uri);
+            setImageName('');
+            setModalVisible(true);
         }
+    };
+
+    const handleSaveImage = () => {
+        if (!imageName.trim()) {
+            Alert.alert(t.incompleteRounds?.title || "Missing Name", "Please enter a name for this image.");
+            return;
+        }
+        addCreatorImage(currentUri);
+        setCreatorImageName(currentUri, imageName.trim());
+        setModalVisible(false);
+        setCurrentUri('');
+        setImageName('');
     };
 
     const handleNext = () => {
@@ -49,11 +68,14 @@ export default function CreatorStep1() {
 
             <ScrollView contentContainerStyle={styles.gallery}>
                 {creatorImages.map((uri, index) => (
-                    <View key={index} style={styles.imageContainer}>
-                        <Image source={{ uri }} style={styles.image} />
-                        <TouchableOpacity onPress={() => removeCreatorImage(index)} style={styles.deleteButton}>
-                            <Text style={styles.deleteText}>X</Text>
-                        </TouchableOpacity>
+                    <View key={index} style={styles.imageCard}>
+                        <View style={styles.imageContainer}>
+                            <Image source={{ uri }} style={styles.image} />
+                            <TouchableOpacity onPress={() => removeCreatorImage(index)} style={styles.deleteButton}>
+                                <Text style={styles.deleteText}>X</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={styles.imageLabel} numberOfLines={1}>{creatorImageNames[uri]}</Text>
                     </View>
                 ))}
 
@@ -65,6 +87,29 @@ export default function CreatorStep1() {
             <TouchableOpacity onPress={handleNext} style={styles.nextButton}>
                 <Text style={styles.nextText}>{t.next}</Text>
             </TouchableOpacity>
+
+            {/* Naming Modal */}
+            <Modal visible={modalVisible} transparent={true} animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{(t as any).nameImage || "Name your image"}</Text>
+                        {currentUri ? <Image source={{ uri: currentUri }} style={styles.previewImage} /> : null}
+                        <TextInput
+                            style={styles.nameInput}
+                            placeholder={(t as any).placeholderName || "Image Name"}
+                            value={imageName}
+                            onChangeText={setImageName}
+                            autoFocus
+                        />
+                        <TouchableOpacity onPress={handleSaveImage} style={styles.saveButton}>
+                            <Text style={styles.saveText}>{(t as any).saveImage || "Save Name"}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+                            <Text style={styles.cancelText}>{t.cancel}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -104,6 +149,11 @@ const styles = StyleSheet.create({
         gap: 10,
         paddingBottom: 100,
     },
+    imageCard: {
+        width: 100,
+        alignItems: 'center',
+        marginBottom: 10,
+    },
     imageContainer: {
         width: 100,
         height: 100,
@@ -111,10 +161,17 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: '#aaa',
+        marginBottom: 5,
     },
     image: {
         width: '100%',
         height: '100%',
+    },
+    imageLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        textAlign: 'center',
+        width: '100%',
     },
     deleteButton: {
         position: 'absolute',
@@ -131,6 +188,79 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 12,
         fontWeight: 'bold',
+    },
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        width: '100%',
+        maxWidth: 400,
+        alignItems: 'center',
+        borderWidth: 3,
+        borderColor: 'black',
+        shadowColor: '#000',
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    previewImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 10,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
+    nameInput: {
+        width: '100%',
+        padding: 15,
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 10,
+        fontSize: 18,
+        marginBottom: 20,
+        backgroundColor: '#f5f5f5',
+    },
+    saveButton: {
+        width: '100%',
+        padding: 15,
+        backgroundColor: '#4CAF50',
+        borderRadius: 10,
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: 'black',
+        marginBottom: 10,
+    },
+    saveText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    cancelButton: {
+        width: '100%',
+        padding: 12,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    cancelText: {
+        color: '#666',
+        fontSize: 16,
+        fontWeight: '600',
     },
     addButton: {
         width: 100,

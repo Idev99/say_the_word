@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
@@ -33,8 +33,9 @@ const ICON_MAP: Record<string, any> = {
 
 export default function ChallengesScreen() {
     const router = useRouter();
-    const { language, communityChallenges, loadLevel, activeTab, setActiveTab } = useGameStore();
+    const { language, communityChallenges, loadLevel, activeTab, setActiveTab, showImageNames, setShowImageNames } = useGameStore();
     const t = translations[language].challenges;
+    const gameT = translations[language].game;
 
     const [sortBy, setSortBy] = React.useState<'plays' | 'likes' | 'newest'>('plays');
 
@@ -164,6 +165,7 @@ export default function ChallengesScreen() {
                     </View>
                 )}
             </ScrollView>
+
         </SafeAreaView>
     );
 }
@@ -198,6 +200,9 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
     const timeAgo = (timestamp: number) => {
         const seconds = Math.floor((Date.now() - timestamp) / 1000);
         const days = Math.floor(seconds / (3600 * 24));
+        const { language } = useGameStore.getState();
+        if (language === 'FR') return `Il y a ${days} j`;
+        if (language === 'ES') return `Hace ${days} d`;
         return `${days} days ago`;
     };
 
@@ -228,6 +233,11 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
             </View>
 
             <View style={styles.cardInfo}>
+                <Text style={styles.cardTitle}>
+                    {challenge.name.includes('.')
+                        ? (challenge.name.split('.').reduce((obj: any, key: string) => obj?.[key], translations[useGameStore.getState().language].challenges) || challenge.name)
+                        : challenge.name}
+                </Text>
                 <Text style={styles.cardMetaText}>{timeAgo(challenge.createdAt)} · {challenge.rounds} rounds</Text>
 
                 <View style={styles.statsRow}>
@@ -507,6 +517,81 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 4, height: 4 },
         shadowOpacity: 1,
         shadowRadius: 0,
-        elevation: 4,
+        elevation: 5,
+    },
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 25,
+        width: '100%',
+        maxWidth: 350,
+        alignItems: 'center',
+        borderWidth: 3,
+        borderColor: 'black',
+        shadowColor: '#000',
+        shadowOffset: { width: 5, height: 5 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 25,
+        textAlign: 'center',
+        color: '#FF508E',
+    },
+    optionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 30,
+        backgroundColor: '#f9f9f9',
+        padding: 15,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    optionText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    confirmButton: {
+        width: '100%',
+        padding: 18,
+        backgroundColor: '#FFEB3B',
+        borderRadius: 12,
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: 'black',
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+    },
+    confirmButtonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'black',
+    },
+    cancelButton: {
+        width: '100%',
+        padding: 12,
+        alignItems: 'center',
+    },
+    cancelText: {
+        fontSize: 16,
+        color: '#666',
+        fontWeight: '600',
     },
 });
