@@ -613,8 +613,8 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     resultButton: {
-        flex: 1,
-        padding: 15,
+        width: '100%',
+        padding: 18,
         borderRadius: 12,
         alignItems: 'center',
         borderWidth: 2,
@@ -645,5 +645,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '800',
         color: 'black',
+        textAlign: 'center',
     },
 });
