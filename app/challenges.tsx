@@ -171,13 +171,13 @@ function MyChallengesView() {
     const t = translations[language].challenges;
     const rt = (t as any).rewards || {};
     const [modalVisible, setModalVisible] = React.useState(false);
-    const pulseAnim = React.useRef(new Animated.Value(1)).current;
+    const anim = React.useRef(new Animated.Value(0)).current;
 
     React.useEffect(() => {
         Animated.loop(
             Animated.sequence([
-                Animated.timing(pulseAnim, { toValue: 1.15, duration: 800, useNativeDriver: true }),
-                Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+                Animated.timing(anim, { toValue: 1, duration: 400, useNativeDriver: true }),
+                Animated.timing(anim, { toValue: 0, duration: 400, useNativeDriver: true }),
             ])
         ).start();
     }, []);
@@ -194,11 +194,20 @@ function MyChallengesView() {
         ? reachedTiers.slice(-3)
         : tiers.slice(0, 3);
 
+    const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] });
+    const rotate = anim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: ['0deg', '-15deg', '0deg', '15deg', '0deg'] });
+    const opacity = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 0.7, 1] });
+
+    // Inverted animations for the Euro icon
+    const scaleInv = anim.interpolate({ inputRange: [0, 1], outputRange: [1.3, 1] });
+    const rotateInv = anim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: ['0deg', '15deg', '0deg', '-15deg', '0deg'] });
+    const opacityInv = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.7, 1, 0.7] });
+
     return (
         <View>
             <TouchableOpacity style={styles.rewardsBanner} onPress={() => setModalVisible(true)}>
                 <View style={styles.rewardsHeader}>
-                    <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                    <Animated.View style={{ transform: [{ scale }, { rotate }], opacity }}>
                         <Ionicons name="gift" size={32} color="#FFD700" />
                     </Animated.View>
                     <View style={{ flex: 1, marginLeft: 10 }}>
@@ -208,6 +217,9 @@ function MyChallengesView() {
                             <Text style={styles.totalViewsBadgeText}>{(totalViews / 1000).toFixed(1)}k views</Text>
                         </View>
                     </View>
+                    <Animated.View style={{ transform: [{ scale: scaleInv }, { rotate: rotateInv }], opacity: opacityInv }}>
+                        <Ionicons name="logo-euro" size={32} color="#FFD700" />
+                    </Animated.View>
                 </View>
 
                 <View style={styles.stepperContainer}>
