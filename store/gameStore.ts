@@ -32,8 +32,10 @@ interface GameStore {
   language: Language;
   introSpeed: number;
   introAnimationSpeed: number;
-  activeTab: 'featured' | 'community';
+  activeTab: 'featured' | 'community' | 'myChallenges';
   showImageNames: boolean;
+  isLoggedIn: boolean;
+  userChallengeIds: string[];
 
   // Community State
   communityChallenges: CommunityChallenge[];
@@ -92,6 +94,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   introAnimationSpeed: 1.15,
   activeTab: 'featured',
   showImageNames: false,
+  isLoggedIn: true,
+  userChallengeIds: ['comm-1', 'comm-2'], // Mock user challenges
 
   communityChallenges: [
     {

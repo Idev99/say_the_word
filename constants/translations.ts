@@ -11,9 +11,9 @@ export const translations = {
             tabs: {
                 featured: "FEATURED",
                 community: "COMMUNITY",
+                myChallenges: "STUDIO",
                 videos: "VIDEOS",
                 create: "CREATE",
-                blog: "BLOG",
             },
             createBanner: "Create Your Own Challenge",
             featuredTitle: "FEATURED CHALLENGES",
@@ -39,6 +39,18 @@ export const translations = {
                 challenge6: { name: "World Tour" },
                 challenge7: { name: "Number Run" },
                 challenge8: { name: "Cafe Vibes" },
+            },
+            rewards: {
+                bannerTitle: "Gifts Won:",
+                totalTiers: "All Tiers",
+                bonusLikes: "Likes Bonus",
+                bonusTikTok: "TikTok Bonus",
+                bonusYouTube: "YouTube Bonus",
+                bonusInstagram: "Instagram Bonus",
+                views: "views",
+                statsTitle: "Your Stats",
+                getPaid: "Get Paid",
+                minAmount: "(50€ min)",
             }
         },
         creator: {
@@ -135,9 +147,9 @@ export const translations = {
             tabs: {
                 featured: "Pour toi",
                 community: "COMMUNAUTÉ",
+                myChallenges: "MES CHALLENGES",
                 videos: "VIDÉOS",
                 create: "CRÉER",
-                blog: "BLOG",
             },
             createBanner: "Crée ton propre défi",
             featuredTitle: "DÉFIS À LA UNE",
@@ -163,6 +175,18 @@ export const translations = {
                 challenge6: { name: "Tour du Monde" },
                 challenge7: { name: "Course aux Chiffres" },
                 challenge8: { name: "Vibes Café" },
+            },
+            rewards: {
+                bannerTitle: "Cadeaux gagnés :",
+                totalTiers: "Toutes les tranches",
+                bonusLikes: "Bonus Likes",
+                bonusTikTok: "Bonus TikTok",
+                bonusYouTube: "Bonus YouTube",
+                bonusInstagram: "Bonus Instagram",
+                views: "vues",
+                statsTitle: "Tes Statistiques",
+                getPaid: "Se faire payer",
+                minAmount: "(50€ min)",
             }
         },
         creator: {
@@ -258,9 +282,9 @@ export const translations = {
             tabs: {
                 featured: "DESTACADO",
                 community: "COMUNIDAD",
+                myChallenges: "STUDIO",
                 videos: "VIDEOS",
                 create: "CREAR",
-                blog: "BLOG",
             },
             createBanner: "Crea tu propio desafío",
             featuredTitle: "DESAFÍOS DESTACADOS",
@@ -286,6 +310,18 @@ export const translations = {
                 challenge6: { name: "Vuelta al Mundo" },
                 challenge7: { name: "Carrera de Números" },
                 challenge8: { name: "Vibras del Café" },
+            },
+            rewards: {
+                bannerTitle: "Premios Ganados:",
+                totalTiers: "Todos los Niveles",
+                bonusLikes: "Bono por Likes",
+                bonusTikTok: "Bono TikTok",
+                bonusYouTube: "Bono YouTube",
+                bonusInstagram: "Bono Instagram",
+                views: "vistas",
+                statsTitle: "Tus Estadísticas",
+                getPaid: "Cobrar",
+                minAmount: "(50€ min)",
             }
         },
         creator: {
