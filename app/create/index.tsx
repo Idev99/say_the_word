@@ -96,7 +96,6 @@ export default function CreatorStep1() {
                         {currentUri ? <Image source={{ uri: currentUri }} style={styles.previewImage} /> : null}
                         <TextInput
                             style={styles.nameInput}
-                            placeholder={(t as any).placeholderName || "Image Name"}
                             value={imageName}
                             onChangeText={setImageName}
                             autoFocus

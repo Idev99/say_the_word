@@ -192,6 +192,29 @@ export default function CreatorDesignStep() {
                     </View>
                 </View>
             </Modal>
+            {/* Name Modal */}
+            <Modal visible={nameModalVisible} animationType="fade" transparent>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.confirmModalContent}>
+                        <Text style={styles.modalTitle}>{(t as any).nameChallenge || "Name your challenge"}</Text>
+                        <TextInput
+                            style={styles.nameInput}
+                            value={creatorName}
+                            onChangeText={setCreatorName}
+                            autoFocus
+                        />
+                        <View style={styles.confirmButtons}>
+                            <TouchableOpacity onPress={() => setNameModalVisible(false)} style={[styles.confirmButton, styles.cancelButton]}>
+                                <Text style={styles.cancelButtonText}>{t.cancel}</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={confirmSave} style={[styles.confirmButton, styles.okButton]}>
+                                <Text style={styles.okButtonText}>{t.save}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }

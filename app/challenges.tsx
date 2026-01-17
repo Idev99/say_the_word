@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions, Platform, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
@@ -52,7 +52,9 @@ export default function ChallengesScreen() {
             <TouchableOpacity onPress={() => setActiveTab('community')} style={[styles.tab, activeTab === 'community' && styles.tabActive]}>
                 <Text style={styles.tabText}>{t.tabs.community}</Text>
             </TouchableOpacity>
-            <View style={styles.tab}><Text style={styles.tabText}>{t.tabs.videos}</Text></View>
+            <TouchableOpacity onPress={() => setActiveTab('videos')} style={[styles.tab, activeTab === 'videos' && styles.tabActive]}>
+                <Text style={styles.tabText}>{t.tabs.videos}</Text>
+            </TouchableOpacity>
             <TouchableOpacity
                 style={styles.tab}
                 onPress={() => {
@@ -156,6 +158,8 @@ export default function ChallengesScreen() {
                             ))}
                         </View>
                     </View>
+                ) : activeTab === 'videos' ? (
+                    <VideosView />
                 ) : (
                     <MyChallengesView />
                 )}
@@ -212,6 +216,82 @@ function GuestStudioView() {
                 </View>
                 <Text style={styles.benefitText}>Earn real world rewards</Text>
             </View>
+        </View>
+    );
+}
+
+const MOCK_VIDEOS = [
+    {
+        id: '1',
+        title: 'Nico joue au jeu 😂',
+        tiktokId: '7585956961473039638',
+        url: 'https://www.tiktok.com/@nico_tine84/video/7585956961473039638'
+    },
+    {
+        id: '3',
+        title: 'Pomme Tarte Maison Mouche 😂',
+        tiktokId: '7588712989033811222',
+        url: 'https://www.tiktok.com/@le.gamer.du.80670/video/7588712989033811222'
+    },
+    {
+        id: '4',
+        title: 'Cendrillon mozzarella 👸🏼⛱️',
+        tiktokId: '7585027159194995990',
+        url: 'https://www.tiktok.com/@berkalinho/video/7585027159194995990'
+    },
+    {
+        id: '2',
+        title: 'Prank 😲',
+        tiktokId: '7589032517588634902',
+        url: 'https://www.tiktok.com/@narinemucus/video/7589032517588634902'
+    }
+];
+
+function VideosView() {
+    return (
+        <View style={styles.videosContainer}>
+            <View style={[styles.sectionHeader, { backgroundColor: '#FFD700', alignSelf: 'center', width: '90%', marginBottom: 20 }]}>
+                <Text style={[styles.sectionHeaderText, { fontSize: 18, textAlign: 'center' }]}>
+                    COMMUNITY VIDEOS
+                </Text>
+            </View>
+            <View style={styles.grid}>
+                {MOCK_VIDEOS.map((video) => (
+                    <VideoCard key={video.id} video={video} />
+                ))}
+            </View>
+        </View>
+    );
+}
+
+function VideoCard({ video }: { video: typeof MOCK_VIDEOS[0] }) {
+    const handleOpen = () => {
+        Linking.openURL(video.url);
+    };
+
+    return (
+        <View style={[styles.videoCard, styles.hardShadow]}>
+            <View style={styles.videoThumbnailContainer}>
+                {Platform.OS === 'web' ? (
+                    <iframe
+                        src={`https://www.tiktok.com/embed/v2/${video.tiktokId}`}
+                        style={{ width: '100%', height: '100%', border: 'none', borderRadius: 10 }}
+                        allow="autoplay; encrypted-media; fullscreen"
+                    />
+                ) : (
+                    <TouchableOpacity style={styles.mobileVideoPlaceholder} onPress={handleOpen}>
+                        <Ionicons name="play-circle" size={60} color="#FF508E" />
+                        <Text style={styles.watchOnTikTok}>Watch on TikTok</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+            <TouchableOpacity onPress={handleOpen} style={styles.videoInfo}>
+                <Text style={styles.videoTitle} numberOfLines={2}>{video.title}</Text>
+                <View style={styles.videoPlatformRow}>
+                    <Ionicons name="logo-tiktok" size={16} color="black" />
+                    <Text style={styles.videoCreator}>TikTok</Text>
+                </View>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -792,5 +872,58 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700',
         color: '#333',
+    },
+
+    // Videos Styles
+    videosContainer: {
+        flex: 1,
+        paddingBottom: 20,
+    },
+    videoCard: {
+        backgroundColor: 'white',
+        borderWidth: 3,
+        borderColor: 'black',
+        borderRadius: 15,
+        width: '48%',
+        marginBottom: 20,
+        overflow: 'hidden',
+    },
+    videoThumbnailContainer: {
+        height: 350,
+        backgroundColor: '#000',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    mobileVideoPlaceholder: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+    },
+    watchOnTikTok: {
+        color: 'white',
+        fontWeight: '900',
+        marginTop: 10,
+        fontSize: 12,
+    },
+    videoInfo: {
+        padding: 10,
+    },
+    videoTitle: {
+        fontSize: 14,
+        fontWeight: '900',
+        color: 'black',
+        marginBottom: 5,
+        height: 40,
+    },
+    videoPlatformRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+    },
+    videoCreator: {
+        fontSize: 12,
+        color: '#666',
+        fontWeight: '700',
     },
 });

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language } from '../constants/translations';
 
 export type GameState = 'MENU' | 'PLAYING' | 'RESULT' | 'CREATING';
@@ -32,7 +34,7 @@ interface GameStore {
   language: Language;
   introSpeed: number;
   introAnimationSpeed: number;
-  activeTab: 'featured' | 'community' | 'myChallenges';
+  activeTab: 'featured' | 'community' | 'myChallenges' | 'videos';
   showImageNames: boolean;
   isLoggedIn: boolean;
   userChallengeIds: string[];
@@ -53,7 +55,7 @@ interface GameStore {
   endRoundIntro: () => void;
   stopGame: () => void;
   restartGame: () => void;
-  setActiveTab: (tab: 'featured' | 'community' | 'myChallenges') => void;
+  setActiveTab: (tab: 'featured' | 'community' | 'myChallenges' | 'videos') => void;
   setShowImageNames: (show: boolean) => void;
   completeGame: () => void;
   rateChallenge: (id: string, stars: number) => void;
@@ -82,7 +84,9 @@ interface GameStore {
   loadCustomLevel: () => void;
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
+export const useGameStore = create<GameStore>()(
+  persist(
+    (set, get) => ({
   gameState: 'MENU',
   currentLevel: null,
   currentRound: 1,
@@ -96,7 +100,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   activeTab: 'featured',
   showImageNames: false,
   isLoggedIn: false,
-  userChallengeIds: ['comm-1', 'comm-2'], // Mock user challenges
+  userChallengeIds: [], // User-created challenges will be persisted here
 
   communityChallenges: [
     {
@@ -505,6 +509,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       
       return {
           communityChallenges: [newChallenge, ...state.communityChallenges],
+          userChallengeIds: [id, ...state.userChallengeIds],
       };
   }),
   resetCreator: () => set({ creatorName: '', creatorImages: [], creatorImageNames: {}, creatorMode: 'RANDOM', creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) } }),
@@ -529,5 +534,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         currentBeat: -1,
         isPlaying: false,
     };
+  }),
+}), {
+  name: 'say-the-word-storage',
+  storage: createJSONStorage(() => AsyncStorage),
+  partialize: (state) => ({
+    communityChallenges: state.communityChallenges,
+    userChallengeIds: state.userChallengeIds,
+    showImageNames: state.showImageNames,
+    language: state.language,
   }),
 }));

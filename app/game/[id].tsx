@@ -131,7 +131,7 @@ export default function GameScreen() {
 
         // Start countdown
         const sequence = [
-            { text: '3', rate: 1, volume: 0.5 },
+            { text: '3', rate: 1.0, volume: 0.5 },
             { text: '2', rate: 1.0, volume: 0.75 },
             { text: '1', rate: 1.2, volume: 1.0 },
             { text: 'GO!', rate: 1.0, volume: 1.0, sound: 'siffletgo' }
