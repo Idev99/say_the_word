@@ -20,6 +20,7 @@ export interface CommunityChallenge extends LevelData {
   playsCount: number;
   likes: number;
   dislikes: number;
+  fire: number;
   createdAt: number; // timestamp
 }
 
@@ -41,6 +42,7 @@ interface GameStore {
 
   // Community State
   communityChallenges: CommunityChallenge[];
+  lastEngagementRefresh: number;
 
   // Actions
   setLanguage: (lang: Language) => void;
@@ -79,6 +81,7 @@ interface GameStore {
   saveChallenge: () => void;
 
   resetCreator: () => void;
+  refreshEngagement: () => void;
   
   // Custom Game Start
   loadCustomLevel: () => void;
@@ -101,6 +104,7 @@ export const useGameStore = create<GameStore>()(
   showImageNames: false,
   isLoggedIn: false,
   userChallengeIds: [], // User-created challenges will be persisted here
+  lastEngagementRefresh: Date.now(),
 
   communityChallenges: [
     {
@@ -143,8 +147,9 @@ export const useGameStore = create<GameStore>()(
         ],
         playsCount: 15400,
         likes: 1205,
-        dislikes: 42,
-        createdAt: Date.now() - (2 * 24 * 60 * 60 * 1000),
+        dislikes: 2,
+        fire: 15,
+        createdAt: Date.now() - (8 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/billy.png')]: "billy",
             [require('../assets/images/squeezie.png')]: "squeezie",
@@ -168,6 +173,7 @@ export const useGameStore = create<GameStore>()(
         playsCount: 3500,
         likes: 150,
         dislikes: 11,
+        fire: 0,
         createdAt: Date.now() - (25 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/steak.png')]: "steak",
@@ -192,8 +198,9 @@ export const useGameStore = create<GameStore>()(
         creatorImages: [require('../assets/images/msn.png'), require('../assets/images/piscine.png'), require('../assets/images/scene.png')],
         playsCount: 996,
         likes: 6,
-        dislikes: 2,
-        createdAt: Date.now() - (30 * 24 * 60 * 60 * 1000),
+        dislikes: 0,
+        fire: 5,
+        createdAt: Date.now() - (35 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/msn.png')]: "msn",
             [require('../assets/images/piscine.png')]: "piscine",
@@ -217,6 +224,7 @@ export const useGameStore = create<GameStore>()(
         playsCount: 120,
         likes: 12,
         dislikes: 0,
+        fire: 55,
         createdAt: Date.now() - (35 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/baby.png')]: "baby",
@@ -238,9 +246,10 @@ export const useGameStore = create<GameStore>()(
             5: [require('../assets/images/red.png'), require('../assets/images/yellow.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/red.png'), require('../assets/images/yellow.png'), require('../assets/images/blue.png'), require('../assets/images/green.png')]
         },
         creatorImages: [require('../assets/images/red.png'), require('../assets/images/blue.png'), require('../assets/images/green.png'), require('../assets/images/yellow.png')],
-        playsCount: 2500,
-        likes: 88,
-        dislikes: 2,
+        playsCount: 450,
+        likes: 24,
+        dislikes: 1,
+        fire: 8,
         createdAt: Date.now() - (5 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/red.png')]: "red",
@@ -265,8 +274,9 @@ export const useGameStore = create<GameStore>()(
         creatorImages: [require('../assets/images/usa.png'), require('../assets/images/china.png'), require('../assets/images/russia.png'), require('../assets/images/ukraine.png')],
         playsCount: 1800,
         likes: 45,
-        dislikes: 3,
-        createdAt: Date.now() - (10 * 24 * 60 * 60 * 1000),
+        dislikes: 0,
+        fire: 3,
+        createdAt: Date.now() - (12 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/usa.png')]: "usa",
             [require('../assets/images/china.png')]: "china",
@@ -291,6 +301,7 @@ export const useGameStore = create<GameStore>()(
         playsCount: 4200,
         likes: 210,
         dislikes: 5,
+        fire: 10,
         createdAt: Date.now() - (15 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/1.png')]: "1",
@@ -316,6 +327,7 @@ export const useGameStore = create<GameStore>()(
         playsCount: 950,
         likes: 32,
         dislikes: 1,
+        fire: 20,
         createdAt: Date.now() - (20 * 24 * 60 * 60 * 1000),
         imageNames: {
             [require('../assets/images/coffee.png')]: "coffee",
@@ -503,6 +515,7 @@ export const useGameStore = create<GameStore>()(
           playsCount: 0,
           likes: 0,
           dislikes: 0,
+          fire: 0,
           createdAt: Date.now(),
           imageNames: state.creatorImageNames,
       };
@@ -513,6 +526,45 @@ export const useGameStore = create<GameStore>()(
       };
   }),
   resetCreator: () => set({ creatorName: '', creatorImages: [], creatorImageNames: {}, creatorMode: 'RANDOM', creatorRoundLayouts: { 1: Array(8).fill(null), 2: Array(8).fill(null), 3: Array(8).fill(null), 4: Array(8).fill(null), 5: Array(8).fill(null) } }),
+
+  refreshEngagement: () => set((state) => {
+    const now = Date.now();
+    const intervalMs = 89 * 60 * 1000; // 89 minutes
+    const elapsed = now - state.lastEngagementRefresh;
+    
+    if (elapsed < intervalMs) return {};
+
+    const intervalsPassed = Math.floor(elapsed / intervalMs);
+    const updatedChallenges = state.communityChallenges.map(challenge => {
+      if (!state.userChallengeIds.includes(challenge.id)) return challenge;
+
+      let newPlays = challenge.playsCount;
+      let newLikes = challenge.likes;
+      let newFire = challenge.fire;
+
+      for (let i = 0; i < intervalsPassed; i++) {
+        // Subtle growth simulation per interval
+        const addedPlays = Math.floor(Math.random() * 10) + 2; // 2-12 plays
+        newPlays += addedPlays;
+        
+        // Random chance for likes/fire
+        if (Math.random() > 0.7) newLikes += 1;
+        if (Math.random() > 0.85) newFire += 1;
+      }
+
+      return {
+        ...challenge,
+        playsCount: newPlays,
+        likes: newLikes,
+        fire: newFire
+      };
+    });
+
+    return {
+      communityChallenges: updatedChallenges,
+      lastEngagementRefresh: state.lastEngagementRefresh + (intervalsPassed * intervalMs)
+    };
+  }),
 
   loadCustomLevel: () => set((state) => {
     // Generate Level Data from Creator State
@@ -543,5 +595,6 @@ export const useGameStore = create<GameStore>()(
     userChallengeIds: state.userChallengeIds,
     showImageNames: state.showImageNames,
     language: state.language,
+    lastEngagementRefresh: state.lastEngagementRefresh,
   }),
 }));

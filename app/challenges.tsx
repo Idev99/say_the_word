@@ -32,8 +32,12 @@ const ICON_MAP: Record<string, any> = {
 
 export default function ChallengesScreen() {
     const router = useRouter();
-    const { language, communityChallenges, loadLevel, activeTab, setActiveTab, isLoggedIn } = useGameStore();
+    const { language, communityChallenges, loadLevel, activeTab, setActiveTab, isLoggedIn, refreshEngagement } = useGameStore();
     const t = translations[language].challenges;
+
+    React.useEffect(() => {
+        refreshEngagement();
+    }, []);
 
     const [sortBy, setSortBy] = React.useState<'plays' | 'likes' | 'newest'>('plays');
 
@@ -315,6 +319,7 @@ function MyChallengesView() {
 
     const userChallenges = communityChallenges.filter(c => userChallengeIds.includes(c.id));
     const totalViews = userChallenges.reduce((acc, c) => acc + c.playsCount, 0);
+    const totalFire = userChallenges.reduce((acc, c) => acc + (c.fire || 0), 0);
 
     const tiers = [1, 5, 10, 20, 50, 100, 500];
     const reachedTiers = tiers.filter(v => totalViews >= v * 1000);
@@ -376,8 +381,14 @@ function MyChallengesView() {
             </TouchableOpacity>
             */}
 
-            <View style={[styles.sectionHeader, { backgroundColor: '#6BF178', width: '100%', marginBottom: 15 }]}>
+            <View style={[styles.sectionHeader, { backgroundColor: '#6BF178', width: '100%', marginBottom: 15, flexDirection: 'row', justifyContent: 'center', gap: 10 }]}>
                 <Text style={styles.sectionHeaderText}>{rt.statsTitle}</Text>
+                {totalFire > 0 && (
+                    <View style={styles.fireBadge}>
+                        <Ionicons name="flame" size={16} color="#FF9800" />
+                        <Text style={styles.fireBadgeText}>{totalFire}</Text>
+                    </View>
+                )}
             </View>
 
             <View style={styles.grid}>
@@ -532,20 +543,21 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
                 </Text>
                 <Text style={styles.cardMetaText}>{timeAgo(challenge.createdAt)} · {challenge.rounds} rounds</Text>
 
-                <View style={styles.statsRow}>
-                    <Ionicons name="flame" size={16} color="#FF508E" />
-                    <Text style={styles.playsCount}>{(challenge.playsCount / 1000).toFixed(1)}K</Text>
-                </View>
-
                 <View style={styles.likesRow}>
+                    <View style={styles.statItem}>
+                        <Ionicons name="play-circle-outline" size={14} color="black" />
+                        <Text style={styles.statValue}>{(challenge.playsCount / 1000).toFixed(1)}K</Text>
+                    </View>
                     <View style={styles.statItem}>
                         <Ionicons name="thumbs-up-outline" size={14} color="black" />
                         <Text style={styles.statValue}>{challenge.likes}</Text>
                     </View>
-                    <View style={styles.statItem}>
-                        <Ionicons name="thumbs-down-outline" size={14} color="black" />
-                        <Text style={styles.statValue}>{challenge.dislikes}</Text>
-                    </View>
+                    {challenge.fire > 0 && (
+                        <View style={styles.statItem}>
+                            <Ionicons name="flame" size={14} color="#FF9800" />
+                            <Text style={styles.statValue}>{challenge.fire}</Text>
+                        </View>
+                    )}
                 </View>
             </View>
         </TouchableOpacity>
@@ -925,5 +937,18 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#666',
         fontWeight: '700',
+    },
+    fireBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.3)',
+        paddingHorizontal: 8,
+        borderRadius: 12,
+        gap: 4,
+    },
+    fireBadgeText: {
+        color: 'black',
+        fontWeight: 'bold',
+        fontSize: 14,
     },
 });
