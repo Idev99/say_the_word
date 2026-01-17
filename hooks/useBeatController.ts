@@ -56,12 +56,12 @@ export const useBeatController = () => {
         const totalRoundBeats = itemsPerRound; 
 
         if (beatCount >= totalRoundBeats) {
-             const { nextRound, currentLevel, currentRound, stopGame } = useGameStore.getState();
+             const { nextRound, currentLevel, currentRound, stopGame, completeGame } = useGameStore.getState();
              
              if (currentLevel && currentRound >= currentLevel.rounds) {
                  // Game Over
                  clearInterval(intervalRef.current!);
-                 stopGame();
+                 completeGame();
                  // Should navigate to result screen realistically
              } else {
                  // Next Round

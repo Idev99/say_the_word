@@ -90,6 +90,10 @@ export const translations = {
             difficultyEasy: "Easy",
             difficultyNormal: "Normal",
             difficultyHard: "Hard",
+            wellDone: "Well done!",
+            rateChallenge: "Rate this challenge",
+            retry: "Retry",
+            backToMenu: "Exit",
         },
         imageNames: {
             bird: "Bird",
@@ -209,6 +213,10 @@ export const translations = {
             difficultyEasy: "Facile",
             difficultyNormal: "Normal",
             difficultyHard: "Difficile",
+            wellDone: "Bien joué !",
+            rateChallenge: "Note ce défi",
+            retry: "Réessayer",
+            backToMenu: "Quitter",
         },
         imageNames: {
             bird: "Oiseau",
@@ -328,6 +336,10 @@ export const translations = {
             difficultyEasy: "Fácil",
             difficultyNormal: "Normal",
             difficultyHard: "Difícil",
+            wellDone: "¡Bien hecho!",
+            rateChallenge: "Calificar este reto",
+            retry: "Reintentar",
+            backToMenu: "Salir",
         },
         imageNames: {
             bird: "Pájaro",

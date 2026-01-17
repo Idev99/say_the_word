@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Modal, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Modal, Switch, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore, LevelData } from '../../store/gameStore';
 import { useBeatController } from '../../hooks/useBeatController';
 import { translations } from '../../constants/translations';
 import { useSoundEffects } from '../../hooks/useSoundEffects';
 import GridSystem from '../../components/game/GridSystem';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
 // Mock Data for "Featured" levels
@@ -83,7 +83,7 @@ const MOCK_LEVELS: Record<string, LevelData> = {
 export default function GameScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame, showImageNames, setShowImageNames } = useGameStore();
+    const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame, showImageNames, setShowImageNames, gameState, rateChallenge } = useGameStore();
     const { playSound, stopAllSounds } = useSoundEffects();
     const t = translations[language].game;
 
@@ -91,6 +91,11 @@ export default function GameScreen() {
     const [isCameraOn, setIsCameraOn] = useState(false);
     const [optionsVisible, setOptionsVisible] = useState(false);
     const [difficulty, setDifficulty] = useState('normal');
+    const [rating, setRating] = useState(0);
+
+    // Countdown state
+    const [countdownText, setCountdownText] = useState<string | null>(null);
+    const countdownAnim = useRef(new Animated.Value(0)).current;
 
     // Initialize Loop
     useBeatController();
@@ -121,7 +126,52 @@ export default function GameScreen() {
         }
     };
 
-    const handleConfirmPlay = () => {
+    const handleConfirmPlay = async () => {
+        setOptionsVisible(false);
+
+        // Start countdown
+        const sequence = [
+            { text: '3', rate: 1, volume: 0.5 },
+            { text: '2', rate: 1.0, volume: 0.75 },
+            { text: '1', rate: 1.2, volume: 1.0 },
+            { text: 'GO!', rate: 1.0, volume: 1.0, sound: 'siffletgo' }
+        ];
+
+        for (const step of sequence) {
+            setCountdownText(step.text);
+            countdownAnim.setValue(0);
+
+            // Trigger animation
+            Animated.parallel([
+                Animated.timing(countdownAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.sequence([
+                    Animated.delay(700),
+                    Animated.timing(countdownAnim, {
+                        toValue: 0,
+                        duration: 300,
+                        useNativeDriver: true,
+                    })
+                ])
+            ]).start();
+
+            // Play sound with crescendo
+            if (step.sound) {
+                playSound(step.sound as any, step.rate, step.volume);
+            } else {
+                playSound('beat', step.rate, step.volume);
+            }
+
+            // Wait for 1 second (approx)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        setCountdownText(null);
+        setRating(0); // Reset rating for new attempt
+
         if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
             restartGame();
             startRound();
@@ -134,6 +184,18 @@ export default function GameScreen() {
         stopAllSounds();
         stopGame();
         router.back();
+    };
+
+    const handleRetry = () => {
+        restartGame();
+        setOptionsVisible(true);
+    };
+
+    const handleRate = (stars: number) => {
+        setRating(stars);
+        if (currentLevel?.id) {
+            rateChallenge(currentLevel.id, stars);
+        }
     };
 
     if (!currentLevel) {
@@ -222,6 +284,60 @@ export default function GameScreen() {
                     </View>
                 </View>
             </Modal>
+
+            {/* Results Modal */}
+            <Modal visible={gameState === 'RESULT'} transparent={true} animationType="slide">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.wellDoneText}>{t.wellDone}</Text>
+
+                        <Text style={styles.rateLabel}>{t.rateChallenge}</Text>
+                        <View style={styles.starsContainer}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <TouchableOpacity key={star} onPress={() => handleRate(star)}>
+                                    <Text style={[styles.starIcon, rating >= star && styles.starActive]}>
+                                        {rating >= star ? '★' : '☆'}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        <View style={styles.resultsButtons}>
+                            <TouchableOpacity onPress={handleBack} style={[styles.resultButton, styles.backBtn]}>
+                                <Text style={styles.resultButtonText}>{t.backToMenu}</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={handleRetry} style={[styles.resultButton, styles.retryBtn]}>
+                                <Text style={styles.resultButtonText}>{t.retry}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Countdown Overlay */}
+            {countdownText && (
+                <View style={styles.countdownOverlay}>
+                    <Animated.Text
+                        style={[
+                            styles.countdownText,
+                            {
+                                opacity: countdownAnim,
+                                transform: [
+                                    {
+                                        scale: countdownAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [0.5, 2.5]
+                                        })
+                                    }
+                                ]
+                            }
+                        ]}
+                    >
+                        {countdownText}
+                    </Animated.Text>
+                </View>
+            )}
         </View>
     );
 }
@@ -404,5 +520,72 @@ const styles = StyleSheet.create({
         color: '#666',
         fontWeight: '700',
         textDecorationLine: 'underline',
+    },
+    // Countdown Styles
+    countdownOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        zIndex: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    countdownText: {
+        fontSize: 100,
+        fontWeight: '900',
+        color: '#FFEB3B',
+        textShadowColor: 'black',
+        textShadowOffset: { width: 4, height: 4 },
+        textShadowRadius: 1,
+    },
+    // Results Modal Styles
+    wellDoneText: {
+        fontSize: 32,
+        fontWeight: '900',
+        color: '#6BF178',
+        marginBottom: 20,
+        textAlign: 'center',
+        textTransform: 'uppercase',
+    },
+    rateLabel: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 10,
+    },
+    starsContainer: {
+        flexDirection: 'row',
+        marginBottom: 30,
+        gap: 10,
+    },
+    starIcon: {
+        fontSize: 40,
+        color: '#DDD',
+    },
+    starActive: {
+        color: '#FFD700',
+    },
+    resultsButtons: {
+        flexDirection: 'row',
+        width: '100%',
+        gap: 15,
+    },
+    resultButton: {
+        flex: 1,
+        padding: 15,
+        borderRadius: 12,
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: 'black',
+    },
+    backBtn: {
+        backgroundColor: '#F5F5F5',
+    },
+    retryBtn: {
+        backgroundColor: '#6BF178',
+    },
+    resultButtonText: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: 'black',
     },
 });

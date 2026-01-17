@@ -2,6 +2,7 @@ import { Audio } from 'expo-av';
 
 const SOUNDS_CONFIG = {
   monmagaietsifflet2: require('../assets/sounds/monmagaietsifflet2.mp3'),
+  siffletgo: require('../assets/sounds/siffletgo.mp3'),
   beat: { uri: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg' },
 };
 
@@ -30,7 +31,7 @@ const loadAllSounds = async () => {
 loadAllSounds();
 
 export const useSoundEffects = () => {
-  const playSound = async (name: keyof typeof SOUNDS_CONFIG, rate: number = 1.0): Promise<void> => {
+  const playSound = async (name: keyof typeof SOUNDS_CONFIG, rate: number = 1.0, volume: number = 1.0): Promise<void> => {
     await loadAllSounds(); // Ensure loaded
 
     return new Promise(async (resolve) => {
@@ -39,6 +40,7 @@ export const useSoundEffects = () => {
         if (sound) {
           await sound.stopAsync();
           await sound.setRateAsync(rate, true);
+          await sound.setVolumeAsync(volume);
           
           sound.setOnPlaybackStatusUpdate((status) => {
             if (status.isLoaded && status.didJustFinish) {

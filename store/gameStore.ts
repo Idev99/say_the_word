@@ -53,6 +53,8 @@ interface GameStore {
   restartGame: () => void;
   setActiveTab: (tab: 'featured' | 'community') => void;
   setShowImageNames: (show: boolean) => void;
+  completeGame: () => void;
+  rateChallenge: (id: string, stars: number) => void;
 
   // Creator State
   creatorName: string;
@@ -383,6 +385,34 @@ export const useGameStore = create<GameStore>((set, get) => ({
   }),
   setBeat: (beat) => set({ currentBeat: beat }),
   stopGame: () => set({ isPlaying: false, gameState: 'MENU', isRoundIntro: false, currentBeat: -1 }),
+  completeGame: () => set((state) => {
+      const isCommunity = state.currentLevel && state.communityChallenges.some(c => c.id === state.currentLevel?.id);
+      
+      if (isCommunity) {
+          const updatedChallenges = state.communityChallenges.map(c => 
+              c.id === state.currentLevel?.id ? { ...c, playsCount: c.playsCount + 1 } : c
+          );
+          return {
+              isPlaying: false,
+              gameState: 'RESULT',
+              isRoundIntro: false,
+              communityChallenges: updatedChallenges
+          };
+      }
+
+      return { isPlaying: false, gameState: 'RESULT', isRoundIntro: false };
+  }),
+
+  rateChallenge: (id, stars) => set((state) => {
+      const updatedChallenges = state.communityChallenges.map(c => {
+          if (c.id === id) {
+              if (stars >= 4) return { ...c, likes: c.likes + 1 };
+              if (stars <= 2) return { ...c, dislikes: c.dislikes + 1 };
+          }
+          return c;
+      });
+      return { communityChallenges: updatedChallenges };
+  }),
   setBpm: (bpm: number) => set({ bpm }),
   setIntroSpeed: (speed: number) => set({ introSpeed: speed }),
   setIntroAnimationSpeed: (speed: number) => set({ introAnimationSpeed: speed }),
