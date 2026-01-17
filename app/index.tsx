@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated, Easing, Dimensions, Image, ImageBackg
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
+import ChallengesScreen from './challenges'; // Import the target screen
 
 const { width, height } = Dimensions.get('window');
 const PAPER_TEXTURE = require('../assets/paper-texture.jpg');
@@ -23,26 +24,26 @@ export default function HomeScreen() {
     const tearProgress = useRef(new Animated.Value(0)).current; // 0 = Intact, 1 = Torn apart
 
     useEffect(() => {
-        // High-Fidelity Sequence with Paper Tear (ACCELERATED)
+        // High-Fidelity Sequence with Paper Tear (ACCELERATED & PRE-RENDERED)
         Animated.sequence([
             // phase 1: Fast Title Reveal
             Animated.parallel([
                 Animated.timing(titleFade, {
                     toValue: 1,
-                    duration: 600, // Faster
+                    duration: 600,
                     easing: Easing.out(Easing.quad),
                     useNativeDriver: true,
                 }),
                 Animated.timing(titleTracking, {
                     toValue: 1,
-                    duration: 1000, // Faster
+                    duration: 1000,
                     easing: Easing.out(Easing.cubic),
                     useNativeDriver: false,
                 }),
-                // phase 2: Early Swirl Start (Parallel with title)
+                // phase 2: Early Swirl Start
                 Animated.timing(vortexProgress, {
                     toValue: 1,
-                    duration: 1400, // Faster
+                    duration: 1400,
                     easing: Easing.bezier(0.5, 0, 0.2, 1),
                     useNativeDriver: true,
                 }),
@@ -50,7 +51,7 @@ export default function HomeScreen() {
             // phase 3: Snappy Tear
             Animated.timing(tearProgress, {
                 toValue: 1,
-                duration: 500, // Very snappy
+                duration: 500,
                 easing: Easing.in(Easing.poly(3)),
                 useNativeDriver: true,
             })
@@ -169,11 +170,9 @@ export default function HomeScreen() {
 
     return (
         <View style={styles.masterContainer}>
-            {/* Background Page Content (already visible behind the tearing paper) */}
-            <View style={styles.placeholderBackground}>
-                <View style={styles.loadingContainer}>
-                    <Text style={styles.loadingText}>Loading Challenges...</Text>
-                </View>
+            {/* Background Layer: Real Challenges Screen Pre-rendered */}
+            <View style={StyleSheet.absoluteFill}>
+                <ChallengesScreen />
             </View>
 
             {/* Left Half */}
@@ -227,21 +226,6 @@ const styles = StyleSheet.create({
     masterContainer: {
         flex: 1,
         backgroundColor: '#FFF',
-    },
-    placeholderBackground: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#E0E0E0', // Light gray background while loading
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    loadingContainer: {
-        alignItems: 'center',
-    },
-    loadingText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#666',
-        marginTop: 20,
     },
     halfContainer: {
         position: 'absolute',
