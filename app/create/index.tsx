@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { useGameStore } from '../../store/gameStore';
 import { translations } from '../../constants/translations';
+import { BannerAd, BannerAdSize } from '../../components/AdBanner';
+import { AD_UNITS } from '../../utils/AdManager';
 
 export default function CreatorStep1() {
     const router = useRouter();
@@ -84,7 +86,7 @@ export default function CreatorStep1() {
                 </TouchableOpacity>
             </ScrollView>
 
-            <TouchableOpacity onPress={handleNext} style={styles.nextButton}>
+            <TouchableOpacity onPress={handleNext} style={[styles.nextButton, { bottom: 80 }]}>
                 <Text style={styles.nextText}>{t.next}</Text>
             </TouchableOpacity>
 
@@ -109,6 +111,17 @@ export default function CreatorStep1() {
                     </View>
                 </View>
             </Modal>
+
+            {/* Fixed Banner at the bottom */}
+            <View style={styles.bannerContainer}>
+                <BannerAd
+                    unitId={AD_UNITS.BANNER}
+                    size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                    requestOptions={{
+                        requestNonPersonalizedAdsOnly: true,
+                    }}
+                />
+            </View>
         </View>
     );
 }
@@ -314,5 +327,16 @@ const styles = StyleSheet.create({
         width: 24,
         height: 24,
         resizeMode: 'contain',
+    },
+    bannerContainer: {
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderTopWidth: 2,
+        borderTopColor: 'black',
+        paddingVertical: 5,
     },
 });

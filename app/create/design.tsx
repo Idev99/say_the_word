@@ -3,7 +3,8 @@ import { useRouter } from 'expo-router';
 import { useGameStore } from '../../store/gameStore';
 import { useState } from 'react';
 import { translations } from '../../constants/translations';
-import { AdManager } from '../../utils/AdManager';
+import { AdManager, AD_UNITS } from '../../utils/AdManager';
+import { BannerAd, BannerAdSize } from '../../components/AdBanner';
 
 const ROUNDS = [1, 2, 3, 4, 5];
 
@@ -218,6 +219,17 @@ export default function CreatorDesignStep() {
                     </View>
                 </View>
             </Modal>
+
+            {/* Fixed Banner at the bottom */}
+            <View style={styles.bannerContainer}>
+                <BannerAd
+                    unitId={AD_UNITS.BANNER}
+                    size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                    requestOptions={{
+                        requestNonPersonalizedAdsOnly: true,
+                    }}
+                />
+            </View>
         </View>
     );
 }
@@ -488,5 +500,16 @@ const styles = StyleSheet.create({
     okButtonText: {
         color: 'black',
         fontWeight: 'bold',
+    },
+    bannerContainer: {
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderTopWidth: 2,
+        borderTopColor: 'black',
+        paddingVertical: 5,
     },
 });

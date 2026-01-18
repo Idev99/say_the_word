@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions, Platform, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions, Platform, Linking, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
 import { Ionicons } from '@expo/vector-icons';
 import { BannerAd, BannerAdSize } from '../components/AdBanner';
-import { AD_UNITS } from '../utils/AdManager';
+import { AdManager, AD_UNITS } from '../utils/AdManager';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -413,6 +413,7 @@ function MyChallengesView() {
                             loadLevel(challenge);
                             router.push(`/game/${challenge.id}`);
                         }}
+                        showBoost={true}
                     />
                 ))}
             </View>
@@ -515,11 +516,27 @@ function ChallengeCard({ title, icons, onPlay }: { title: string, icons: string[
     );
 }
 
-function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay: () => void }) {
+function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: any, onPlay: () => void, showBoost?: boolean }) {
+    const { boostChallenge, language } = useGameStore();
+    const t = translations[language].challenges;
+    const rt = (t as any).rewards || {};
+
+    const handleBoost = async () => {
+        const todayBoosts = challenge.boostsToday || 0;
+        if (todayBoosts >= 5) {
+            Alert.alert("Daily Limit", rt.boostLimit.replace('{n}', '5'));
+            return;
+        }
+
+        await AdManager.showRewarded(() => {
+            boostChallenge(challenge.id);
+            Alert.alert("Success", rt.boostSuccess);
+        });
+    };
+
     const timeAgo = (timestamp: number) => {
         const seconds = Math.floor((Date.now() - timestamp) / 1000);
         const days = Math.floor(seconds / (3600 * 24));
-        const { language } = useGameStore.getState();
         if (language === 'FR') return `Il y a ${days} j`;
         if (language === 'ES') return `Hace ${days} d`;
         return `${days} days ago`;
@@ -534,9 +551,26 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
     }
     while (stackImages.length < 3) stackImages.push('https://via.placeholder.com/150');
 
+    const boostLevel = challenge.boostsToday || 0; // Show current daily level
+
     return (
-        <TouchableOpacity style={[styles.card, styles.hardShadow]} onPress={onPlay}>
-            <View style={styles.stackContainer}>
+        <View style={[styles.card, styles.hardShadow]}>
+            <TouchableOpacity style={styles.stackContainer} onPress={onPlay}>
+                {/* Flame Boost Indicator (GTA Style) */}
+                {boostLevel > 0 && (
+                    <View style={styles.boostFlamesContainer}>
+                        {Array(5).fill(0).map((_, i) => (
+                            <Ionicons
+                                key={i}
+                                name="flame"
+                                size={14}
+                                color={i < boostLevel ? "#FF9800" : "#ccc"}
+                                style={{ opacity: i < boostLevel ? 1 : 0.3 }}
+                            />
+                        ))}
+                    </View>
+                )}
+
                 <View style={[styles.stackCard, styles.stackCardBack, { transform: [{ rotate: '-10deg' }, { translateX: -10 }] }]}>
                     <Image source={typeof stackImages[2] === 'string' ? { uri: stackImages[2] } : stackImages[2]} style={styles.stackImage} />
                 </View>
@@ -546,12 +580,12 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
                 <View style={[styles.stackCard, styles.stackCardTop]}>
                     <Image source={typeof stackImages[0] === 'string' ? { uri: stackImages[0] } : stackImages[0]} style={styles.stackImage} />
                 </View>
-            </View>
+            </TouchableOpacity>
 
             <View style={styles.cardInfo}>
                 <Text style={styles.cardTitle}>
                     {challenge.name.includes('.')
-                        ? (challenge.name.split('.').reduce((obj: any, key: string) => obj?.[key], translations[useGameStore.getState().language].challenges) || challenge.name)
+                        ? (challenge.name.split('.').reduce((obj: any, key: string) => obj?.[key], translations[language].challenges) || challenge.name)
                         : challenge.name}
                 </Text>
                 <Text style={styles.cardMetaText}>{timeAgo(challenge.createdAt)} · {challenge.rounds} rounds</Text>
@@ -565,17 +599,26 @@ function CommunityChallengeCard({ challenge, onPlay }: { challenge: any, onPlay:
                         <Ionicons name="thumbs-up-outline" size={14} color="black" />
                         <Text style={styles.statValue}>{challenge.likes}</Text>
                     </View>
-                    {challenge.fire > 0 && (
-                        <View style={styles.statItem}>
-                            <Ionicons name="flame" size={14} color="#FF9800" />
-                            <Text style={styles.statValue}>{challenge.fire}</Text>
-                        </View>
-                    )}
                 </View>
+
+                {showBoost && (
+                    <TouchableOpacity
+                        style={[styles.boostButton, (challenge.boostsToday || 0) >= 5 && styles.boostButtonDisabled]}
+                        onPress={handleBoost}
+                        disabled={(challenge.boostsToday || 0) >= 5}
+                    >
+                        <Ionicons name="flame" size={16} color="black" />
+                        <Text style={styles.boostButtonText}>
+                            {rt.boostLimit.replace('{n}', (challenge.boostsToday || 0).toString())}
+                        </Text>
+                    </TouchableOpacity>
+                )}
             </View>
-        </TouchableOpacity>
+        </View>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     safeArea: { flex: 1 },
@@ -972,5 +1015,44 @@ const styles = StyleSheet.create({
         borderTopWidth: 2,
         borderTopColor: 'black',
         paddingVertical: 5,
+    },
+    boostFlamesContainer: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        flexDirection: 'row',
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        padding: 4,
+        borderRadius: 10,
+        zIndex: 10,
+        borderWidth: 1,
+        borderColor: 'black',
+    },
+    boostButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#FFEB3B',
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        marginTop: 10,
+        gap: 6,
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 2,
+    },
+    boostButtonDisabled: {
+        backgroundColor: '#eee',
+        opacity: 0.6,
+    },
+    boostButtonText: {
+        fontSize: 12,
+        fontWeight: '900',
+        color: 'black',
     },
 });

@@ -51,6 +51,10 @@ export const translations = {
                 statsTitle: "Your Stats",
                 getPaid: "Get Paid",
                 minAmount: "(50€ min)",
+                boostTitle: "🚀 BOOST FIRE",
+                boostLimit: "Boost {n}/5",
+                watchAdToBoost: "Watch ad to boost engagement!",
+                boostSuccess: "Engagement Boosted!",
                 guest: {
                     title: "Turn your challenges into CASH!",
                     subtitle: "Publish your games, reach thousands of players, and win real gifts.",
@@ -198,6 +202,10 @@ export const translations = {
                 statsTitle: "Tes Statistiques",
                 getPaid: "Se faire payer",
                 minAmount: "(50€ min)",
+                boostTitle: "🚀 BOOST FIRE",
+                boostLimit: "Boost {n}/5",
+                watchAdToBoost: "Regarde une pub pour booster l'engagement !",
+                boostSuccess: "Engagement Boosté !",
                 guest: {
                     title: "Gagne de l'argent avec tes challenges !",
                     subtitle: "Publie tes jeux, atteint des milliers de joueurs et gagne de vrais cadeaux.",
@@ -344,6 +352,10 @@ export const translations = {
                 statsTitle: "Tus Estadísticas",
                 getPaid: "Cobrar",
                 minAmount: "(50€ min)",
+                boostTitle: "🚀 BOOST FIRE",
+                boostLimit: "Boost {n}/5",
+                watchAdToBoost: "¡Mira un anuncio para aumentar el compromiso!",
+                boostSuccess: "¡Compromiso aumentado!",
                 guest: {
                     title: "¡Gana dinero con tus retos!",
                     subtitle: "Publica tus juegos, llega a miles de jugadores y gana premios reales.",

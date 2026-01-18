@@ -21,6 +21,8 @@ export interface CommunityChallenge extends LevelData {
   likes: number;
   dislikes: number;
   fire: number;
+  boostLevel?: number; // Total/Persistence level
+  boostsToday?: number; // 0 to 5, resets daily
   createdAt: number; // timestamp
 }
 
@@ -48,6 +50,7 @@ interface GameStore {
   totalFire: number;
   lastResult: { fire: number } | null;
   retryCount: number;
+  lastBoostReset: number;
 
   // Actions
   setLanguage: (lang: Language) => void;
@@ -58,6 +61,8 @@ interface GameStore {
   setBeat: (beat: number) => void;
   setIntroSpeed: (speed: number) => void;
   setIntroAnimationSpeed: (speed: number) => void;
+  boostChallenge: (id: string) => void;
+  checkBoostReset: () => void;
 
   endRoundIntro: () => void;
   stopGame: () => void;
@@ -120,6 +125,7 @@ export const useGameStore = create<GameStore>()(
   totalFire: 0,
   lastResult: null,
   retryCount: 0,
+  lastBoostReset: Date.now(),
 
   communityChallenges: [
     {
@@ -455,6 +461,50 @@ export const useGameStore = create<GameStore>()(
 
   incrementRetryCount: () => set((state) => ({ retryCount: state.retryCount + 1 })),
   resetRetryCount: () => set({ retryCount: 0 }),
+  
+  boostChallenge: (id: string) => set((state) => {
+    const updatedChallenges = state.communityChallenges.map(c => {
+        if (c.id === id) {
+            const todayBoosts = c.boostsToday || 0;
+            if (todayBoosts >= 5) return c;
+
+            // Big boost
+            const addedPlays = Math.floor(Math.random() * 100) + 50; // 50-150
+            const addedFire = Math.floor(Math.random() * 5) + 5; // 5-10
+            
+            return { 
+                ...c, 
+                boostLevel: (c.boostLevel || 0) + 1,
+                boostsToday: todayBoosts + 1,
+                playsCount: c.playsCount + addedPlays,
+                fire: c.fire + addedFire
+            };
+        }
+        return c;
+    });
+
+    return { 
+        communityChallenges: updatedChallenges
+    };
+  }),
+
+  checkBoostReset: () => set((state) => {
+    const now = Date.now();
+    const lastResetDate = new Date(state.lastBoostReset).toLocaleDateString();
+    const todayDate = new Date(now).toLocaleDateString();
+
+    if (lastResetDate !== todayDate) {
+        const resetChallenges = state.communityChallenges.map(c => ({
+            ...c,
+            boostsToday: 0
+        }));
+        return { 
+            communityChallenges: resetChallenges,
+            lastBoostReset: now 
+        };
+    }
+    return {};
+  }),
 
   rateChallenge: (id, stars) => set((state) => {
       const updatedChallenges = state.communityChallenges.map(c => {
@@ -549,6 +599,8 @@ export const useGameStore = create<GameStore>()(
           likes: 0,
           dislikes: 0,
           fire: 0,
+          boostLevel: 0,
+          boostsToday: 0,
           createdAt: Date.now(),
           imageNames: state.creatorImageNames,
       };
@@ -568,7 +620,19 @@ export const useGameStore = create<GameStore>()(
     if (elapsed < intervalMs) return {};
 
     const intervalsPassed = Math.floor(elapsed / intervalMs);
-    const updatedChallenges = state.communityChallenges.map(challenge => {
+    
+    // Daily Boost Reset Check (Inline)
+    const lastResetDate = new Date(state.lastBoostReset).toLocaleDateString();
+    const todayDate = new Date(now).toLocaleDateString();
+    let currentChallenges = state.communityChallenges;
+    let nextBoostResetVal = state.lastBoostReset;
+
+    if (lastResetDate !== todayDate) {
+        currentChallenges = currentChallenges.map(c => ({ ...c, boostsToday: 0 }));
+        nextBoostResetVal = now;
+    }
+
+    const updatedChallenges = currentChallenges.map(challenge => {
       if (!state.userChallengeIds.includes(challenge.id)) return challenge;
 
       let newPlays = challenge.playsCount;
@@ -595,7 +659,8 @@ export const useGameStore = create<GameStore>()(
 
     return {
       communityChallenges: updatedChallenges,
-      lastEngagementRefresh: state.lastEngagementRefresh + (intervalsPassed * intervalMs)
+      lastEngagementRefresh: state.lastEngagementRefresh + (intervalsPassed * intervalMs),
+      lastBoostReset: nextBoostResetVal
     };
   }),
 
@@ -629,5 +694,6 @@ export const useGameStore = create<GameStore>()(
     showImageNames: state.showImageNames,
     language: state.language,
     lastEngagementRefresh: state.lastEngagementRefresh,
+    lastBoostReset: state.lastBoostReset,
   }),
 }));
