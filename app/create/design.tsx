@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useGameStore } from '../../store/gameStore';
 import { useState } from 'react';
 import { translations } from '../../constants/translations';
+import { AdManager } from '../../utils/AdManager';
 
 const ROUNDS = [1, 2, 3, 4, 5];
 
@@ -59,16 +60,18 @@ export default function CreatorDesignStep() {
         return false;
     };
 
-    const confirmSave = () => {
+    const confirmSave = async () => {
         if (!creatorName.trim()) {
             Alert.alert("Required", "Please enter a name for your challenge");
             return;
         }
+
+        await AdManager.showInterstitial();
+
         saveChallenge();
         setNameModalVisible(false);
         resetCreator();
         router.push('/challenges');
-        // We might need a small delay or state sync to show the community tab immediately
     };
 
     const proceedToGame = () => {

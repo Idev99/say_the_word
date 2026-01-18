@@ -5,19 +5,13 @@ import LanguagePicker from '../components/LanguagePicker';
 import BackgroundDecor from '../components/BackgroundDecor';
 
 import { AdManager } from '../utils/AdManager';
-import mobileAds from 'react-native-google-mobile-ads';
 import React, { useEffect } from 'react';
 
 const PAPER_TEXTURE = require('../assets/paper-texture.jpg');
 
 export default function RootLayout() {
     useEffect(() => {
-        // Initialize AdMob and Preload Ads
-        mobileAds().initialize().then(() => {
-            console.log('AdMob Initialized');
-            AdManager.loadInterstitial();
-            AdManager.loadRewarded();
-        });
+        AdManager.initialize();
     }, []);
 
     return (

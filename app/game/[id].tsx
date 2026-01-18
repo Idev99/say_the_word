@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Modal, Switch, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Modal, Switch, Animated, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore, LevelData } from '../../store/gameStore';
 import { useBeatController } from '../../hooks/useBeatController';
@@ -8,7 +8,7 @@ import GridSystem from '../../components/game/GridSystem';
 import { useEffect, useState, useRef } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { AdManager, AD_UNITS } from '../../utils/AdManager';
-import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
+import { BannerAd, BannerAdSize } from '../../components/AdBanner';
 import { Ionicons } from '@expo/vector-icons';
 
 // Mock Data for "Featured" levels
@@ -88,7 +88,7 @@ export default function GameScreen() {
     const router = useRouter();
     const { loadLevel, startRound, currentLevel, currentBeat, currentRound, isPlaying, stopGame, language, restartGame, setGameState, showImageNames, setShowImageNames, gameState, rateChallenge } = useGameStore();
     const { playSound, stopAllSounds } = useSoundEffects();
-    const t = translations[language].game;
+    const t = (translations[language].game as any);
 
     const [permission, requestPermission] = useCameraPermissions();
     const [isCameraOn, setIsCameraOn] = useState(false);
@@ -121,11 +121,19 @@ export default function GameScreen() {
     }, [isPlaying, gameState]);
 
     const toggleCamera = async () => {
-        if (!permission?.granted) {
-            const { granted } = await requestPermission();
-            if (granted) setIsCameraOn(true);
+        if (!isCameraOn) {
+            if (!permission?.granted) {
+                const { granted } = await requestPermission();
+                if (granted) {
+                    setIsCameraOn(true);
+                    await AdManager.showInterstitial();
+                }
+            } else {
+                setIsCameraOn(true);
+                await AdManager.showInterstitial();
+            }
         } else {
-            setIsCameraOn(!isCameraOn);
+            setIsCameraOn(false);
         }
     };
 
@@ -190,12 +198,28 @@ export default function GameScreen() {
         router.back();
     };
 
-    const handleRetryDirect = () => {
+    const handleRetryDirect = async () => {
+        const { retryCount, incrementRetryCount, resetRetryCount } = useGameStore.getState();
+        incrementRetryCount();
+
+        if (retryCount + 1 >= 2) {
+            await AdManager.showInterstitial();
+            resetRetryCount();
+        }
+
         restartGame();
         handleConfirmPlay();
     };
 
-    const handleRetryWithOptions = () => {
+    const handleRetryWithOptions = async () => {
+        const { retryCount, incrementRetryCount, resetRetryCount } = useGameStore.getState();
+        incrementRetryCount();
+
+        if (retryCount + 1 >= 2) {
+            await AdManager.showInterstitial();
+            resetRetryCount();
+        }
+
         restartGame();
     };
 
@@ -249,6 +273,7 @@ export default function GameScreen() {
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>{t.optionsTitle}</Text>
 
+
                         <View style={styles.optionRow}>
                             <Text style={styles.optionText}>{t.showNames}</Text>
                             <Switch
@@ -261,12 +286,12 @@ export default function GameScreen() {
 
                         <View style={styles.optionRow}>
                             <Text style={styles.optionText}>{t.showCamera}</Text>
-                            <Switch
-                                value={isCameraOn}
-                                onValueChange={toggleCamera}
-                                trackColor={{ false: '#767577', true: '#FF508E' }}
-                                thumbColor={isCameraOn ? '#fff' : '#f4f3f4'}
-                            />
+                            <TouchableOpacity
+                                onPress={toggleCamera}
+                                style={[styles.buttonSmall, isCameraOn && styles.buttonActive]}
+                            >
+                                <Text style={styles.buttonText}>{isCameraOn ? t.camOn : t.camOff}</Text>
+                            </TouchableOpacity>
                         </View>
 
                         <Text style={styles.difficultyLabel}>{t.difficulty}</Text>
@@ -320,44 +345,18 @@ export default function GameScreen() {
 
                         <View style={styles.resultsButtons}>
                             <TouchableOpacity
-                                onPress={async () => {
-                                    const rewarded = await AdManager.showRewarded(() => {
-                                        // Reward logic: Double fire if applicable
-                                        const state = useGameStore.getState();
-                                        if (state.lastResult && state.lastResult.fire > 0) {
-                                            state.addFire(state.lastResult.fire);
-                                            console.log('Reward earned: Fire doubled!');
-                                        }
-                                    });
-                                    if (!rewarded) handleRetryDirect();
-                                }}
-                                style={[styles.resultButton, { backgroundColor: '#FFD700', marginBottom: 10 }]}
+                                onPress={handleRetryDirect}
+                                style={[styles.resultButton, styles.retryBtn]}
                             >
-                                <Ionicons name="gift" size={20} color="black" />
-                                <Text style={styles.resultButtonText}> DOUBLE YOUR FIRE! (AD)</Text>
+                                <Text style={styles.resultButtonText}>{t.retry}</Text>
                             </TouchableOpacity>
 
-                            <View style={{ flexDirection: 'row', gap: 10 }}>
-                                <TouchableOpacity
-                                    onPress={async () => {
-                                        await AdManager.showInterstitial();
-                                        handleRetryDirect();
-                                    }}
-                                    style={[styles.resultButton, styles.retryBtn]}
-                                >
-                                    <Text style={styles.resultButtonText}>{t.retry}</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={async () => {
-                                        await AdManager.showInterstitial();
-                                        handleRetryWithOptions();
-                                    }}
-                                    style={[styles.resultButton, styles.optionBtn]}
-                                >
-                                    <Text style={styles.resultButtonText}>{t.retryWithOptions}</Text>
-                                </TouchableOpacity>
-                            </View>
+                            <TouchableOpacity
+                                onPress={handleRetryWithOptions}
+                                style={[styles.resultButton, styles.optionBtn]}
+                            >
+                                <Text style={styles.resultButtonText}>{t.retryWithOptions}</Text>
+                            </TouchableOpacity>
                         </View>
 
                         <TouchableOpacity

@@ -47,6 +47,7 @@ interface GameStore {
   // User Stats
   totalFire: number;
   lastResult: { fire: number } | null;
+  retryCount: number;
 
   // Actions
   setLanguage: (lang: Language) => void;
@@ -92,6 +93,10 @@ interface GameStore {
   
   // Stats Actions
   addFire: (amount: number) => void;
+
+  // Ad Actions
+  incrementRetryCount: () => void;
+  resetRetryCount: () => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -114,6 +119,7 @@ export const useGameStore = create<GameStore>()(
   lastEngagementRefresh: Date.now(),
   totalFire: 0,
   lastResult: null,
+  retryCount: 0,
 
   communityChallenges: [
     {
@@ -446,6 +452,9 @@ export const useGameStore = create<GameStore>()(
   }),
 
   addFire: (amount) => set((state) => ({ totalFire: state.totalFire + amount })),
+
+  incrementRetryCount: () => set((state) => ({ retryCount: state.retryCount + 1 })),
+  resetRetryCount: () => set({ retryCount: 0 }),
 
   rateChallenge: (id, stars) => set((state) => {
       const updatedChallenges = state.communityChallenges.map(c => {

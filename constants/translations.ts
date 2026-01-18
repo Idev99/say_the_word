@@ -96,6 +96,10 @@ export const translations = {
         game: {
             back: "Back",
             round: "ROUND",
+            cameraOn: 'Camera: ON',
+            cameraOff: 'Camera: OFF',
+            confirm: 'PLAY',
+            cancel: 'BACK',
             camOn: "Cam ON",
             camOff: "Cam OFF",
             loading: "Loading...",
@@ -238,6 +242,10 @@ export const translations = {
         game: {
             back: "Retour",
             round: "ROUND",
+            cameraOn: 'Caméra: ON',
+            cameraOff: 'Caméra: OFF',
+            confirm: 'JOUER',
+            cancel: 'RETOUR',
             camOn: "Cam ON",
             camOff: "Cam OFF",
             loading: "Chargement...",

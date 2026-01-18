@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
 import { Ionicons } from '@expo/vector-icons';
-import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
+import { BannerAd, BannerAdSize } from '../components/AdBanner';
 import { AD_UNITS } from '../utils/AdManager';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
