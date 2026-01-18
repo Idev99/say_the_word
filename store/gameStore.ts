@@ -43,6 +43,10 @@ interface GameStore {
   // Community State
   communityChallenges: CommunityChallenge[];
   lastEngagementRefresh: number;
+  
+  // User Stats
+  totalFire: number;
+  lastResult: { fire: number } | null;
 
   // Actions
   setLanguage: (lang: Language) => void;
@@ -85,6 +89,9 @@ interface GameStore {
   
   // Custom Game Start
   loadCustomLevel: () => void;
+  
+  // Stats Actions
+  addFire: (amount: number) => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -105,6 +112,8 @@ export const useGameStore = create<GameStore>()(
   isLoggedIn: false,
   userChallengeIds: [], // User-created challenges will be persisted here
   lastEngagementRefresh: Date.now(),
+  totalFire: 0,
+  lastResult: null,
 
   communityChallenges: [
     {
@@ -407,6 +416,10 @@ export const useGameStore = create<GameStore>()(
   setBeat: (beat) => set({ currentBeat: beat }),
   stopGame: () => set({ isPlaying: false, gameState: 'MENU', isRoundIntro: false, currentBeat: -1 }),
   completeGame: () => set((state) => {
+      // Calculate Fire for this session (e.g., base 10)
+      const earnedFire = 10; 
+      const newTotalFire = state.totalFire + earnedFire;
+
       const isCommunity = state.currentLevel && state.communityChallenges.some(c => c.id === state.currentLevel?.id);
       
       if (isCommunity) {
@@ -417,12 +430,22 @@ export const useGameStore = create<GameStore>()(
               isPlaying: false,
               gameState: 'RESULT',
               isRoundIntro: false,
-              communityChallenges: updatedChallenges
+              communityChallenges: updatedChallenges,
+              totalFire: newTotalFire,
+              lastResult: { fire: earnedFire }
           };
       }
 
-      return { isPlaying: false, gameState: 'RESULT', isRoundIntro: false };
+      return { 
+        isPlaying: false, 
+        gameState: 'RESULT', 
+        isRoundIntro: false,
+        totalFire: newTotalFire,
+        lastResult: { fire: earnedFire }
+      };
   }),
+
+  addFire: (amount) => set((state) => ({ totalFire: state.totalFire + amount })),
 
   rateChallenge: (id, stars) => set((state) => {
       const updatedChallenges = state.communityChallenges.map(c => {

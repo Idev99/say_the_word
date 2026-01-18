@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
 import { Ionicons } from '@expo/vector-icons';
+import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
+import { AD_UNITS } from '../utils/AdManager';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -175,6 +177,17 @@ export default function ChallengesScreen() {
                 )} 
                 */}
             </ScrollView>
+
+            {/* Fixed Banner at the bottom */}
+            <View style={styles.bannerContainer}>
+                <BannerAd
+                    unitId={AD_UNITS.BANNER}
+                    size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                    requestOptions={{
+                        requestNonPersonalizedAdsOnly: true,
+                    }}
+                />
+            </View>
         </SafeAreaView>
     );
 }
@@ -950,5 +963,14 @@ const styles = StyleSheet.create({
         color: 'black',
         fontWeight: 'bold',
         fontSize: 14,
+    },
+    bannerContainer: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderTopWidth: 2,
+        borderTopColor: 'black',
+        paddingVertical: 5,
     },
 });

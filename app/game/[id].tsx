@@ -7,6 +7,9 @@ import { useSoundEffects } from '../../hooks/useSoundEffects';
 import GridSystem from '../../components/game/GridSystem';
 import { useEffect, useState, useRef } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { AdManager, AD_UNITS } from '../../utils/AdManager';
+import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
+import { Ionicons } from '@expo/vector-icons';
 
 // Mock Data for "Featured" levels
 const MOCK_LEVELS: Record<string, LevelData> = {
@@ -316,21 +319,70 @@ export default function GameScreen() {
                         </View>
 
                         <View style={styles.resultsButtons}>
-                            <TouchableOpacity onPress={handleRetryDirect} style={[styles.resultButton, styles.retryBtn]}>
-                                <Text style={styles.resultButtonText}>{t.retry}</Text>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    const rewarded = await AdManager.showRewarded(() => {
+                                        // Reward logic: Double fire if applicable
+                                        const state = useGameStore.getState();
+                                        if (state.lastResult && state.lastResult.fire > 0) {
+                                            state.addFire(state.lastResult.fire);
+                                            console.log('Reward earned: Fire doubled!');
+                                        }
+                                    });
+                                    if (!rewarded) handleRetryDirect();
+                                }}
+                                style={[styles.resultButton, { backgroundColor: '#FFD700', marginBottom: 10 }]}
+                            >
+                                <Ionicons name="gift" size={20} color="black" />
+                                <Text style={styles.resultButtonText}> DOUBLE YOUR FIRE! (AD)</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity onPress={handleRetryWithOptions} style={[styles.resultButton, styles.optionBtn]}>
-                                <Text style={styles.resultButtonText}>{t.retryWithOptions}</Text>
-                            </TouchableOpacity>
+                            <View style={{ flexDirection: 'row', gap: 10 }}>
+                                <TouchableOpacity
+                                    onPress={async () => {
+                                        await AdManager.showInterstitial();
+                                        handleRetryDirect();
+                                    }}
+                                    style={[styles.resultButton, styles.retryBtn]}
+                                >
+                                    <Text style={styles.resultButtonText}>{t.retry}</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={async () => {
+                                        await AdManager.showInterstitial();
+                                        handleRetryWithOptions();
+                                    }}
+                                    style={[styles.resultButton, styles.optionBtn]}
+                                >
+                                    <Text style={styles.resultButtonText}>{t.retryWithOptions}</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
-                        <TouchableOpacity onPress={handleBack} style={styles.resultsBackFull}>
+                        <TouchableOpacity
+                            onPress={async () => {
+                                await AdManager.showInterstitial();
+                                handleBack();
+                            }}
+                            style={styles.resultsBackFull}
+                        >
                             <Text style={styles.resultsBackFullText}>{t.backToMenu}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
+
+            {/* Banner at the very bottom */}
+            <View style={styles.bannerContainer}>
+                <BannerAd
+                    unitId={AD_UNITS.BANNER}
+                    size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                    requestOptions={{
+                        requestNonPersonalizedAdsOnly: true,
+                    }}
+                />
+            </View>
 
             {/* Countdown Overlay */}
             {countdownText && (
@@ -646,5 +698,16 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         color: 'black',
         textAlign: 'center',
+    },
+    bannerContainer: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderTopWidth: 2,
+        borderTopColor: 'black',
+        paddingVertical: 5,
+        position: 'absolute',
+        bottom: 0,
     },
 });
