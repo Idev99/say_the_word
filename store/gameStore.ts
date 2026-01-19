@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language } from '../constants/translations';
+import { Alert } from 'react-native';
 
 export type GameState = 'MENU' | 'PLAYING' | 'RESULT' | 'CREATING';
 
@@ -23,6 +24,8 @@ export interface CommunityChallenge extends LevelData {
   fire: number;
   boostLevel?: number; // Total/Persistence level
   boostsToday?: number; // 0 to 5, resets daily
+  isViral?: boolean; // If this challenge is destined to "buzz"
+  hasBuzzNotified?: boolean; // To prevent multiple alerts
   createdAt: number; // timestamp
 }
 
@@ -468,16 +471,11 @@ export const useGameStore = create<GameStore>()(
             const todayBoosts = c.boostsToday || 0;
             if (todayBoosts >= 5) return c;
 
-            // Big boost
-            const addedPlays = Math.floor(Math.random() * 100) + 50; // 50-150
-            const addedFire = Math.floor(Math.random() * 5) + 5; // 5-10
-            
+            // Boost now only increases the multiplier/level, doesn't add views instantly (Phantom growth)
             return { 
                 ...c, 
                 boostLevel: (c.boostLevel || 0) + 1,
                 boostsToday: todayBoosts + 1,
-                playsCount: c.playsCount + addedPlays,
-                fire: c.fire + addedFire
             };
         }
         return c;
@@ -587,6 +585,9 @@ export const useGameStore = create<GameStore>()(
   }),
   saveChallenge: () => set((state) => {
       const id = `comm-${Date.now()}`;
+      // Randomly assign viral status (higher chance for first few challenges)
+      const isViral = state.userChallengeIds.length < 2 || Math.random() < 0.2;
+
       const newChallenge: CommunityChallenge = {
           id: id,
           name: state.creatorName || 'Unnamed Challenge',
@@ -601,6 +602,8 @@ export const useGameStore = create<GameStore>()(
           fire: 0,
           boostLevel: 0,
           boostsToday: 0,
+          isViral: isViral,
+          hasBuzzNotified: false,
           createdAt: Date.now(),
           imageNames: state.creatorImageNames,
       };
@@ -614,7 +617,7 @@ export const useGameStore = create<GameStore>()(
 
   refreshEngagement: () => set((state) => {
     const now = Date.now();
-    const intervalMs = 89 * 60 * 1000; // 89 minutes
+    const intervalMs = 1 * 60 * 1000; // 1 minute interval for snappy organic updates
     const elapsed = now - state.lastEngagementRefresh;
     
     if (elapsed < intervalMs) return {};
@@ -638,22 +641,53 @@ export const useGameStore = create<GameStore>()(
       let newPlays = challenge.playsCount;
       let newLikes = challenge.likes;
       let newFire = challenge.fire;
+      let notified = !!challenge.hasBuzzNotified;
+
+      const ageHours = (now - challenge.createdAt) / (1000 * 60 * 60);
 
       for (let i = 0; i < intervalsPassed; i++) {
-        // Subtle growth simulation per interval
-        const addedPlays = Math.floor(Math.random() * 10) + 2; // 2-12 plays
-        newPlays += addedPlays;
+        // --- ORGANIC GROWTH LOGIC ---
         
-        // Random chance for likes/fire
-        if (Math.random() > 0.7) newLikes += 1;
-        if (Math.random() > 0.85) newFire += 1;
+        // 1. Base Multiplier (Diminishes after 1 hour)
+        let baseChance = ageHours < 1 ? 0.95 : 0.40;
+        let playRange = ageHours < 1 ? [3, 7] : [0, 2]; // Fast start: 3-7 views/min (~180-420/hour)
+        
+        // 2. Viral "Buzz" Multiplier
+        if (challenge.isViral) {
+            baseChance = 1.0; 
+            playRange = ageHours < 5 ? [10, 25] : [2, 5]; // Viral burst
+        }
+
+        // 3. Phantom Boost Multiplier (+5% chance/rate per flame, randomized)
+        const boostLevel = challenge.boostLevel || 0;
+        const boostEffect = 1 + (boostLevel * 0.05 * Math.random());
+        
+        // 4. Calculate Added plays
+        if (Math.random() < baseChance) {
+            const added = Math.floor(Math.random() * (playRange[1] - playRange[0] + 1)) + playRange[0];
+            newPlays += Math.floor(added * boostEffect);
+        }
+        
+        // 5. Random Likes/Fire (tied to plays)
+        if (Math.random() > 0.85) newLikes += 1;
+        if (Math.random() > 0.95) newFire += 1;
+      }
+
+      // Check for Buzz Notification (approx 11k views, 200 likes)
+      if (!notified && newPlays >= 11000 && newLikes >= 200) {
+          Alert.alert(
+              "🚀 CHALLENGE EN BUZZ !", 
+              `Félicitations ! Votre challenge "${challenge.name}" est en train de buzzer dans la section Communauté !`
+          );
+          notified = true;
       }
 
       return {
         ...challenge,
         playsCount: newPlays,
         likes: newLikes,
-        fire: newFire
+        fire: newFire,
+        hasBuzzNotified: notified
       };
     });
 

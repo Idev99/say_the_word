@@ -85,10 +85,6 @@ export default function ChallengesScreen() {
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView contentContainerStyle={styles.container}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="black" />
-                </TouchableOpacity>
-
                 {renderHeader()}
 
                 {activeTab === 'featured' ? (
@@ -314,7 +310,7 @@ function VideoCard({ video }: { video: typeof MOCK_VIDEOS[0] }) {
 }
 
 function MyChallengesView() {
-    const { language, communityChallenges, userChallengeIds, loadLevel } = useGameStore();
+    const { language, communityChallenges, userChallengeIds, loadLevel, refreshEngagement } = useGameStore();
     const router = useRouter();
     const t = translations[language].challenges;
     const rt = (t as any).rewards || {};
@@ -402,6 +398,9 @@ function MyChallengesView() {
                         <Text style={styles.fireBadgeText}>{totalFire}</Text>
                     </View>
                 )}
+                <TouchableOpacity onPress={() => refreshEngagement()} style={styles.manualRefreshButton}>
+                    <Ionicons name="refresh" size={18} color="black" />
+                </TouchableOpacity>
             </View>
 
             <View style={styles.grid}>
@@ -593,7 +592,9 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
                 <View style={styles.likesRow}>
                     <View style={styles.statItem}>
                         <Ionicons name="play-circle-outline" size={14} color="black" />
-                        <Text style={styles.statValue}>{(challenge.playsCount / 1000).toFixed(1)}K</Text>
+                        <Text style={styles.statValue}>
+                            {challenge.playsCount >= 1000 ? (challenge.playsCount / 1000).toFixed(1) + 'K' : Math.floor(challenge.playsCount)}
+                        </Text>
                     </View>
                     <View style={styles.statItem}>
                         <Ionicons name="thumbs-up-outline" size={14} color="black" />
@@ -1054,5 +1055,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '900',
         color: 'black',
+    },
+    manualRefreshButton: {
+        marginLeft: 10,
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        padding: 5,
+        borderRadius: 20,
     },
 });
