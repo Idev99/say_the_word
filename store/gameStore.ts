@@ -476,6 +476,7 @@ export const useGameStore = create<GameStore>()(
                 ...c, 
                 boostLevel: (c.boostLevel || 0) + 1,
                 boostsToday: todayBoosts + 1,
+                fire: c.fire + (Math.floor(Math.random() * 3) + 2), // +2-5 flames per boost
             };
         }
         return c;

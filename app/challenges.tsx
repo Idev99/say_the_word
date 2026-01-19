@@ -316,6 +316,22 @@ function MyChallengesView() {
     const rt = (t as any).rewards || {};
     const [modalVisible, setModalVisible] = React.useState(false);
     const anim = React.useRef(new Animated.Value(0)).current;
+    const refreshAnim = React.useRef(new Animated.Value(0)).current;
+
+    const handleRefresh = () => {
+        refreshAnim.setValue(0);
+        Animated.timing(refreshAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+        }).start();
+        refreshEngagement();
+    };
+
+    const spin = refreshAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+    });
 
     React.useEffect(() => {
         Animated.loop(
@@ -390,17 +406,21 @@ function MyChallengesView() {
             </TouchableOpacity>
             */}
 
-            <View style={[styles.sectionHeader, { backgroundColor: '#6BF178', width: '100%', marginBottom: 15, flexDirection: 'row', justifyContent: 'center', gap: 10 }]}>
-                <Text style={styles.sectionHeaderText}>{rt.statsTitle}</Text>
-                {totalFire > 0 && (
-                    <View style={styles.fireBadge}>
-                        <Ionicons name="flame" size={16} color="#FF9800" />
-                        <Text style={styles.fireBadgeText}>{totalFire}</Text>
-                    </View>
-                )}
-                <TouchableOpacity onPress={() => refreshEngagement()} style={styles.manualRefreshButton}>
-                    <Ionicons name="refresh" size={18} color="black" />
-                </TouchableOpacity>
+            <View style={styles.statsBanner}>
+                <Text style={styles.statsBannerTitle}>{rt.statsTitle}</Text>
+                <View style={styles.statsBannerRight}>
+                    {totalFire > 0 && (
+                        <View style={styles.fireBadge}>
+                            <Ionicons name="flame" size={16} color="#FF9800" />
+                            <Text style={styles.fireBadgeText}>{totalFire}</Text>
+                        </View>
+                    )}
+                    <TouchableOpacity onPress={handleRefresh} style={styles.manualRefreshButton}>
+                        <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                            <Ionicons name="refresh" size={22} color="black" />
+                        </Animated.View>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <View style={styles.grid}>
@@ -1058,8 +1078,43 @@ const styles = StyleSheet.create({
     },
     manualRefreshButton: {
         marginLeft: 10,
-        backgroundColor: 'rgba(255,255,255,0.5)',
-        padding: 5,
-        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        padding: 8,
+        borderRadius: 25,
+        borderWidth: 1.5,
+        borderColor: 'black',
+        shadowColor: '#000',
+        shadowOffset: { width: 1, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1,
+        elevation: 2,
+    },
+    statsBanner: {
+        backgroundColor: '#6BF178',
+        width: '100%',
+        marginBottom: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: 'black',
+        shadowColor: '#000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 3,
+    },
+    statsBannerTitle: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: 'black',
+    },
+    statsBannerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
 });
