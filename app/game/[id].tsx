@@ -80,6 +80,181 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             [require('../../assets/images/usa.png')]: "usa",
             [require('../../assets/images/china.png')]: "china",
         }
+    },
+    'influencers': {
+        id: 'influencers',
+        name: 'Influencers Pack',
+        rounds: 5,
+        images: [
+            require('../../assets/images/billy.png'),
+            require('../../assets/images/squeezie.png'),
+            require('../../assets/images/biaggi.png'),
+            require('../../assets/images/msn.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/billy.png')]: "billy",
+            [require('../../assets/images/squeezie.png')]: "squeezie",
+            [require('../../assets/images/biaggi.png')]: "biaggi",
+            [require('../../assets/images/msn.png')]: "msn",
+        }
+    },
+    'yummy': {
+        id: 'yummy',
+        name: 'Yummy Feast',
+        rounds: 5,
+        images: [
+            require('../../assets/images/steak.png'),
+            require('../../assets/images/watermelon.png'),
+            require('../../assets/images/cake.png'),
+            require('../../assets/images/coffee.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/steak.png')]: "steak",
+            [require('../../assets/images/watermelon.png')]: "watermelon",
+            [require('../../assets/images/cake.png')]: "cake",
+            [require('../../assets/images/coffee.png')]: "coffee",
+        }
+    },
+    'travel': {
+        id: 'travel',
+        name: 'World Travel',
+        rounds: 5,
+        images: [
+            require('../../assets/images/car.png'),
+            require('../../assets/images/piscine.png'),
+            require('../../assets/images/scene.png'),
+            require('../../assets/images/china.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/car.png')]: "car",
+            [require('../../assets/images/piscine.png')]: "pool",
+            [require('../../assets/images/scene.png')]: "stage",
+            [require('../../assets/images/china.png')]: "china",
+        }
+    },
+    'cute': {
+        id: 'cute',
+        name: 'Cute & Co',
+        rounds: 5,
+        images: [
+            require('../../assets/images/cat.png'),
+            require('../../assets/images/baby.png'),
+            require('../../assets/images/bird.png'),
+            require('../../assets/images/bubble.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/cat.png')]: "cat",
+            [require('../../assets/images/baby.png')]: "baby",
+            [require('../../assets/images/bird.png')]: "bird",
+            [require('../../assets/images/bubble.png')]: "bubble",
+        }
+    },
+    'party': {
+        id: 'party',
+        name: 'Party Time',
+        rounds: 5,
+        images: [
+            require('../../assets/images/cake.png'),
+            require('../../assets/images/bubble.png'),
+            require('../../assets/images/scene.png'),
+            require('../../assets/images/biaggi.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/cake.png')]: "cake",
+            [require('../../assets/images/bubble.png')]: "bubble",
+            [require('../../assets/images/scene.png')]: "stage",
+            [require('../../assets/images/biaggi.png')]: "biaggi",
+        }
+    },
+    'summer': {
+        id: 'summer',
+        name: 'Summer Vibes',
+        rounds: 5,
+        images: [
+            require('../../assets/images/watermelon.png'),
+            require('../../assets/images/piscine.png'),
+            require('../../assets/images/yellow.png'),
+            require('../../assets/images/blue.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/watermelon.png')]: "watermelon",
+            [require('../../assets/images/piscine.png')]: "pool",
+            [require('../../assets/images/yellow.png')]: "yellow",
+            [require('../../assets/images/blue.png')]: "blue",
+        }
+    },
+    'tech': {
+        id: 'tech',
+        name: 'Tech Life',
+        rounds: 5,
+        images: [
+            require('../../assets/images/msn.png'),
+            require('../../assets/images/1.png'),
+            require('../../assets/images/2.png'),
+            require('../../assets/images/3.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/msn.png')]: "msn",
+            [require('../../assets/images/1.png')]: "one",
+            [require('../../assets/images/2.png')]: "two",
+            [require('../../assets/images/3.png')]: "three",
+        }
+    },
+    'nature': {
+        id: 'nature',
+        name: 'Nature Walk',
+        rounds: 5,
+        images: [
+            require('../../assets/images/bird.png'),
+            require('../../assets/images/green.png'),
+            require('../../assets/images/butter.png'),
+            require('../../assets/images/yellow.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/bird.png')]: "bird",
+            [require('../../assets/images/green.png')]: "green",
+            [require('../../assets/images/butter.png')]: "butter",
+            [require('../../assets/images/yellow.png')]: "yellow",
+        }
+    },
+    'panier': {
+        id: 'panier',
+        name: 'Basket Piano',
+        rounds: 6,
+        images: [
+            require('../../assets/images/panier.png'),
+            require('../../assets/images/piano.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/panier.png')]: "panier",
+            [require('../../assets/images/piano.png')]: "piano",
+        }
+    },
+    'chaperon': {
+        id: 'chaperon',
+        name: 'Chaperon Champignon',
+        rounds: 6,
+        images: [
+            require('../../assets/images/chaperon.png'),
+            require('../../assets/images/champignon.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/chaperon.png')]: "chaperon",
+            [require('../../assets/images/champignon.png')]: "champignon",
+        }
+    },
+    'chaussette': {
+        id: 'chaussette',
+        name: 'Chaussette Coussin',
+        rounds: 6,
+        images: [
+            require('../../assets/images/chaussette.png'),
+            require('../../assets/images/coussin.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/chaussette.png')]: "chaussette",
+            [require('../../assets/images/coussin.png')]: "coussin",
+        }
     }
 };
 

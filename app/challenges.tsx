@@ -30,6 +30,20 @@ const ICON_MAP: Record<string, any> = {
     ukraine: require('../assets/images/ukraine.png'),
     usa: require('../assets/images/usa.png'),
     china: require('../assets/images/china.png'),
+    biaggi: require('../assets/images/biaggi.png'),
+    billy: require('../assets/images/billy.png'),
+    msn: require('../assets/images/msn.png'),
+    piscine: require('../assets/images/piscine.png'),
+    scene: require('../assets/images/scene.png'),
+    squeezie: require('../assets/images/squeezie.png'),
+    steak: require('../assets/images/steak.png'),
+    watermelon: require('../assets/images/watermelon.png'),
+    panier: require('../assets/images/panier.png'),
+    piano: require('../assets/images/piano.png'),
+    chaperon: require('../assets/images/chaperon.png'),
+    champignon: require('../assets/images/champignon.png'),
+    chaussette: require('../assets/images/chaussette.png'),
+    coussin: require('../assets/images/coussin.png'),
 };
 
 export default function ChallengesScreen() {
@@ -127,6 +141,46 @@ export default function ChallengesScreen() {
                                 title={t.list.country}
                                 icons={['russia', 'ukraine', 'usa', 'china']}
                                 onPlay={() => router.push('/game/country')}
+                            />
+                            <ChallengeCard
+                                title={t.list.influencers}
+                                icons={['billy', 'squeezie', 'biaggi', 'msn']}
+                                onPlay={() => router.push('/game/influencers')}
+                            />
+                            <ChallengeCard
+                                title={t.list.yummy}
+                                icons={['steak', 'watermelon', 'cake', 'coffee']}
+                                onPlay={() => router.push('/game/yummy')}
+                            />
+                            <ChallengeCard
+                                title={t.list.travel}
+                                icons={['car', 'piscine', 'scene', 'china']}
+                                onPlay={() => router.push('/game/travel')}
+                            />
+                            <ChallengeCard
+                                title={t.list.cute}
+                                icons={['cat', 'baby', 'bird', 'bubble']}
+                                onPlay={() => router.push('/game/cute')}
+                            />
+                            <ChallengeCard
+                                title={t.list.party}
+                                icons={['cake', 'bubble', 'scene', 'biaggi']}
+                                onPlay={() => router.push('/game/party')}
+                            />
+                            <ChallengeCard
+                                title={t.list.panier}
+                                icons={['panier', 'piano', 'panier', 'piano']}
+                                onPlay={() => router.push('/game/panier')}
+                            />
+                            <ChallengeCard
+                                title={t.list.chaperon}
+                                icons={['chaperon', 'champignon', 'chaperon', 'champignon']}
+                                onPlay={() => router.push('/game/chaperon')}
+                            />
+                            <ChallengeCard
+                                title={t.list.chaussette}
+                                icons={['chaussette', 'coussin', 'chaussette', 'coussin']}
+                                onPlay={() => router.push('/game/chaussette')}
                             />
                         </View>
                     </>
