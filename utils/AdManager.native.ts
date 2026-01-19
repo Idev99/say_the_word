@@ -62,11 +62,10 @@ export const AdManager = {
         rewarded.load();
         return false;
     },
-};
-
-export const initializeMobileAds = async () => {
-    await mobileAds().initialize();
-    console.log('AdMob Initialized');
-    AdManager.loadInterstitial();
-    AdManager.loadRewarded();
+    initialize: async () => {
+        await mobileAds().initialize();
+        console.log('AdMob Initialized');
+        AdManager.loadInterstitial();
+        AdManager.loadRewarded();
+    }
 };
