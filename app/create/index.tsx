@@ -21,7 +21,7 @@ export default function CreatorStep1() {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [1, 1],
-            quality: 0.4, // Strict compression for storage efficiency
+            quality: 0.2, // Strict compression to fit more challenges in storage
         });
 
         if (!result.canceled) {

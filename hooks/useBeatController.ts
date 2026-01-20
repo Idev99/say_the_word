@@ -77,7 +77,7 @@ export const useBeatController = () => {
         } else {
             // Normal beat
             if (beatCount < itemsPerRound) {
-                playBeat();
+                // playBeat(); // User requested to remove the beep sound between images
             }
             // If beatCount >= 8 (the pause beats), we don't play sound? Or maybe a different sound?
             // Site has a different "tock" or silence. Let's silence for now.

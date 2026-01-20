@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions, Platform, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions, Platform, Linking, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
@@ -44,6 +44,13 @@ const ICON_MAP: Record<string, any> = {
     champignon: require('../assets/images/champignon.png'),
     chaussette: require('../assets/images/chaussette.png'),
     coussin: require('../assets/images/coussin.png'),
+    apple: require('../assets/images/apple.png'),
+    pie: require('../assets/images/pie.png'),
+    horse: require('../assets/images/horse.png'),
+    fly: require('../assets/images/fly.png'),
+    mozzarella: require('../assets/images/mozzarella.png'),
+    cinderella: require('../assets/images/cinderella.png'),
+    umbrella: require('../assets/images/umbrella.png'),
 };
 
 export default function ChallengesScreen() {
@@ -123,6 +130,26 @@ export default function ChallengesScreen() {
 
                         <View style={styles.grid}>
                             <ChallengeCard
+                                title={t.list.pomme}
+                                icons={['apple', 'pie', 'horse', 'fly']}
+                                onPlay={() => router.push('/game/pomme')}
+                            />
+                            <ChallengeCard
+                                title={t.list.influencers}
+                                icons={['billy', 'squeezie', 'biaggi']}
+                                onPlay={() => router.push('/game/influencers')}
+                            />
+                            <ChallengeCard
+                                title={t.list.panier}
+                                icons={['panier', 'piano', 'panier', 'piano']}
+                                onPlay={() => router.push('/game/panier')}
+                            />
+                            <ChallengeCard
+                                title={t.list.mozzarella}
+                                icons={['mozzarella', 'cinderella', 'umbrella']}
+                                onPlay={() => router.push('/game/mozzarella')}
+                            />
+                            <ChallengeCard
                                 title={t.list.bird}
                                 icons={['bird', 'butter', 'bubble', 'baby']}
                                 onPlay={() => router.push('/game/bird')}
@@ -143,11 +170,6 @@ export default function ChallengesScreen() {
                                 onPlay={() => router.push('/game/country')}
                             />
                             <ChallengeCard
-                                title={t.list.influencers}
-                                icons={['billy', 'squeezie', 'biaggi', 'msn']}
-                                onPlay={() => router.push('/game/influencers')}
-                            />
-                            <ChallengeCard
                                 title={t.list.yummy}
                                 icons={['steak', 'watermelon', 'cake', 'coffee']}
                                 onPlay={() => router.push('/game/yummy')}
@@ -166,11 +188,6 @@ export default function ChallengesScreen() {
                                 title={t.list.party}
                                 icons={['cake', 'bubble', 'scene', 'biaggi']}
                                 onPlay={() => router.push('/game/party')}
-                            />
-                            <ChallengeCard
-                                title={t.list.panier}
-                                icons={['panier', 'piano', 'panier', 'piano']}
-                                onPlay={() => router.push('/game/panier')}
                             />
                             <ChallengeCard
                                 title={t.list.chaperon}
@@ -373,6 +390,7 @@ function MyChallengesView() {
     const refreshAnim = React.useRef(new Animated.Value(0)).current;
 
     const handleRefresh = () => {
+        AdManager.loadRewarded(); // Preload on manual refresh
         refreshAnim.setValue(0);
         Animated.timing(refreshAnim, {
             toValue: 1,
@@ -592,11 +610,12 @@ function ChallengeCard({ title, icons, onPlay }: { title: string, icons: string[
 function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: any, onPlay: () => void, showBoost?: boolean }) {
     const { boostChallenge, language } = useGameStore();
     const [isBoosting, setIsBoosting] = React.useState(false);
+    const [isAdLoading, setIsAdLoading] = React.useState(false);
     const t = translations[language].challenges;
     const rt = (t as any).rewards || {};
 
     const handleBoost = async () => {
-        if (isBoosting) return;
+        if (isAdLoading || isBoosting) return;
 
         // 1. Global Cooldown Check (3 minutes)
         const lastGlobalBoost = useGameStore.getState().lastGlobalBoostTime;
@@ -605,7 +624,7 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
 
         if (now - lastGlobalBoost < COOLDOWN_MS) {
             const remainingMins = Math.ceil((COOLDOWN_MS - (now - lastGlobalBoost)) / 60000);
-            Alert.alert(rt.boostTitle, rt.adNotReady); // Using "Bonus non disponible..."
+            Alert.alert(rt.boostTitle, rt.adNotReady);
             return;
         }
 
@@ -624,10 +643,29 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
             return;
         }
 
+        setIsAdLoading(true);
+        AdManager.loadRewarded(); // Ensure we are trying to load
+
+        // 3. Wait for Ad for up to 6 seconds
+        let attempts = 0;
+        const maxAttempts = 12; // 12 * 500ms = 6s
+
+        while (!AdManager.isRewardedLoaded() && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            attempts++;
+        }
+
+        if (!AdManager.isRewardedLoaded()) {
+            setIsAdLoading(false);
+            Alert.alert(rt.boostTitle, rt.adNotReady);
+            return;
+        }
+
+        // 4. Show Ad
+        setIsAdLoading(false);
         setIsBoosting(true);
         const success = await AdManager.showRewarded(() => {
             boostChallenge(challenge.id);
-            Alert.alert(rt.boostSuccess.split(' ')[0] || "Success", rt.boostSuccess);
         });
 
         if (!success) {
@@ -740,9 +778,13 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
                         disabled={isButtonDisabled}
                     >
                         <Ionicons name="flame" size={16} color="black" />
-                        <Text style={styles.boostButtonText}>
-                            {isBoosting ? rt.loading : getRemainingText()}
-                        </Text>
+                        {isAdLoading ? (
+                            <ActivityIndicator size="small" color="black" style={{ marginLeft: 5 }} />
+                        ) : (
+                            <Text style={styles.boostButtonText}>
+                                {isBoosting ? rt.loading : getRemainingText()}
+                            </Text>
+                        )}
                     </TouchableOpacity>
                 )}
             </View>

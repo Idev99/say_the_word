@@ -10,6 +10,9 @@ export const AdManager = {
     loadInterstitial: () => {
         console.log('AdManager: [Web Mock] loadInterstitial');
     },
+    isRewardedLoaded: () => {
+        return false;
+    },
     showInterstitial: async () => {
         console.log('AdManager: [Web Mock] showInterstitial');
         return true;

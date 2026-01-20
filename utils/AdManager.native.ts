@@ -39,13 +39,19 @@ export const AdManager = {
     },
 
     // Rewarded Logic
+    isRewardedLoaded: () => {
+        return rewarded.loaded;
+    },
     loadRewarded: () => {
-        rewarded.load();
+        if (!rewarded.loaded) {
+            console.log('AdMob: Loading Rewarded Ad...');
+            rewarded.load();
+        }
     },
     showRewarded: (onReward: () => void): Promise<boolean> => {
         return new Promise((resolve) => {
             if (!rewarded.loaded) {
-                console.log('AdMob: Rewarded ad not loaded');
+                console.log('AdMob: Rewarded ad not loaded, attempting emergency reload');
                 rewarded.load();
                 resolve(false);
                 return;
@@ -63,36 +69,41 @@ export const AdManager = {
                 earned = true;
             }));
 
+            // Force reload on close, error, etc.
+            const handleFinish = () => {
+                cleanUp();
+                setTimeout(() => AdManager.loadRewarded(), 1000); // Wait 1s and reload
+            };
+
             subs.push(rewarded.addAdEventListener(AdEventType.CLOSED, () => {
                 console.log('AdMob: Ad closed');
-                cleanUp();
+                handleFinish();
                 if (earned) {
                     onReward();
                     resolve(true);
                 } else {
                     resolve(false);
                 }
-                rewarded.load(); // Preload next
             }));
 
             subs.push(rewarded.addAdEventListener(AdEventType.ERROR, (err) => {
                 console.warn('AdMob: Ad error', err);
-                cleanUp();
+                handleFinish();
                 resolve(false);
-                rewarded.load();
             }));
 
             rewarded.show().catch(err => {
                 console.error('AdMob: Failed to show ad', err);
-                cleanUp();
+                handleFinish();
                 resolve(false);
-                rewarded.load();
             });
         });
     },
     initialize: async () => {
         await mobileAds().initialize();
         console.log('AdMob Initialized');
+
+        // Initial loads
         AdManager.loadInterstitial();
         AdManager.loadRewarded();
     }

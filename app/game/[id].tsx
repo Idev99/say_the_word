@@ -89,13 +89,43 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             require('../../assets/images/billy.png'),
             require('../../assets/images/squeezie.png'),
             require('../../assets/images/biaggi.png'),
-            require('../../assets/images/msn.png'),
         ],
         imageNames: {
             [require('../../assets/images/billy.png')]: "billy",
             [require('../../assets/images/squeezie.png')]: "squeezie",
             [require('../../assets/images/biaggi.png')]: "biaggi",
-            [require('../../assets/images/msn.png')]: "msn",
+        }
+    },
+    'pomme': {
+        id: 'pomme',
+        name: 'Pomme Tarte Cheval Mouche',
+        rounds: 5,
+        images: [
+            require('../../assets/images/apple.png'),
+            require('../../assets/images/pie.png'),
+            require('../../assets/images/horse.png'),
+            require('../../assets/images/fly.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/apple.png')]: "pomme",
+            [require('../../assets/images/pie.png')]: "tarte",
+            [require('../../assets/images/horse.png')]: "cheval",
+            [require('../../assets/images/fly.png')]: "mouche",
+        }
+    },
+    'mozzarella': {
+        id: 'mozzarella',
+        name: 'Mozarella Cendrillon Parapluie',
+        rounds: 5,
+        images: [
+            require('../../assets/images/mozzarella.png'),
+            require('../../assets/images/cinderella.png'),
+            require('../../assets/images/umbrella.png'),
+        ],
+        imageNames: {
+            [require('../../assets/images/mozzarella.png')]: "mozarella",
+            [require('../../assets/images/cinderella.png')]: "cendrillon",
+            [require('../../assets/images/umbrella.png')]: "parapluie",
         }
     },
     'yummy': {
@@ -346,243 +376,240 @@ export default function GameScreen() {
             ]).start();
 
             // Play sound with crescendo
-            if (step.sound) {
-                playSound(step.sound as any, step.rate, step.volume);
-            } else {
-                playSound('beat', step.rate, step.volume);
-            }
-
-            // Wait for 1 second (approx)
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // playSound('beat', step.rate, step.volume);
         }
 
-        setCountdownText(null);
-        setRating(0); // Reset rating for new attempt
-
-        if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
-            restartGame();
-            startRound();
-        } else {
-            startRound();
-        }
-    };
-
-    const handleBack = () => {
-        stopAllSounds();
-        stopGame();
-        router.back();
-    };
-
-    const handleRetryDirect = async () => {
-        const { retryCount, incrementRetryCount, resetRetryCount } = useGameStore.getState();
-        incrementRetryCount();
-
-        if (retryCount + 1 >= 2) {
-            await AdManager.showInterstitial();
-            resetRetryCount();
-        }
-
-        restartGame();
-        handleConfirmPlay();
-    };
-
-    const handleRetryWithOptions = async () => {
-        const { retryCount, incrementRetryCount, resetRetryCount } = useGameStore.getState();
-        incrementRetryCount();
-
-        if (retryCount + 1 >= 2) {
-            await AdManager.showInterstitial();
-            resetRetryCount();
-        }
-
-        restartGame();
-    };
-
-    const handleRate = (stars: number) => {
-        setRating(stars);
-        if (currentLevel?.id) {
-            rateChallenge(currentLevel.id, stars);
-        }
-    };
-
-    if (!currentLevel) {
-        return <View style={styles.container}><Text>{t.loading}</Text></View>;
+        // Wait for 1 second (approx)
+        await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={handleBack} style={styles.buttonSmall}>
-                    <Text style={styles.buttonText}>{t.back}</Text>
-                </TouchableOpacity>
+    setCountdownText(null);
+    setRating(0); // Reset rating for new attempt
 
-                <Text style={styles.roundText}>{t.round} {currentRound}/{currentLevel.rounds}</Text>
+    if (currentLevel && currentRound >= currentLevel.rounds && !isPlaying) {
+        restartGame();
+        startRound();
+    } else {
+        startRound();
+    }
+};
 
-                <TouchableOpacity onPress={toggleCamera} style={[styles.buttonSmall, isCameraOn && styles.buttonActive]}>
-                    <Text style={styles.buttonText}>{isCameraOn ? t.camOn : t.camOff}</Text>
-                </TouchableOpacity>
+const handleBack = () => {
+    stopAllSounds();
+    stopGame();
+    router.back();
+};
+
+const handleRetryDirect = async () => {
+    const { retryCount, incrementRetryCount, resetRetryCount } = useGameStore.getState();
+    incrementRetryCount();
+
+    if (retryCount + 1 >= 2) {
+        await AdManager.showInterstitial();
+        resetRetryCount();
+    }
+
+    restartGame();
+    handleConfirmPlay();
+};
+
+const handleRetryWithOptions = async () => {
+    const { retryCount, incrementRetryCount, resetRetryCount } = useGameStore.getState();
+    incrementRetryCount();
+
+    if (retryCount + 1 >= 2) {
+        await AdManager.showInterstitial();
+        resetRetryCount();
+    }
+
+    restartGame();
+};
+
+const handleRate = (stars: number) => {
+    setRating(stars);
+    if (currentLevel?.id) {
+        rateChallenge(currentLevel.id, stars);
+    }
+};
+
+if (!currentLevel) {
+    return <View style={styles.container}><Text>{t.loading}</Text></View>;
+}
+
+return (
+    <View style={styles.container}>
+        <View style={styles.header}>
+            <TouchableOpacity onPress={handleBack} style={styles.buttonSmall}>
+                <Text style={styles.buttonText}>{t.back}</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.roundText}>{t.round} {currentRound}/{currentLevel.rounds}</Text>
+
+            <TouchableOpacity onPress={toggleCamera} style={[styles.buttonSmall, isCameraOn && styles.buttonActive]}>
+                <Text style={styles.buttonText}>{isCameraOn ? t.camOn : t.camOff}</Text>
+            </TouchableOpacity>
+        </View>
+
+
+        <ScrollView
+            contentContainerStyle={[
+                styles.scrollContent,
+                isCameraOn ? styles.scrollContentCameraOn : styles.scrollContentCameraOff
+            ]}
+            style={styles.scrollView}
+        >
+            <View style={[styles.gameArea, !isCameraOn && { aspectRatio: 1, justifyContent: 'center' }]}>
+                <GridSystem key={currentRound} level={currentLevel} activeBeat={currentBeat} />
             </View>
 
-
-            <ScrollView
-                contentContainerStyle={[
-                    styles.scrollContent,
-                    isCameraOn ? styles.scrollContentCameraOn : styles.scrollContentCameraOff
-                ]}
-                style={styles.scrollView}
-            >
-                <View style={[styles.gameArea, !isCameraOn && { aspectRatio: 1, justifyContent: 'center' }]}>
-                    <GridSystem key={currentRound} level={currentLevel} activeBeat={currentBeat} />
-                </View>
-
-                {isCameraOn && (
-                    <View style={styles.cameraContainer}>
-                        <CameraView style={styles.cameraPreview} facing="front" />
-                    </View>
-                )}
-            </ScrollView>
-
-            {/* Game Options Modal */}
-            <Modal visible={optionsVisible} transparent={true} animationType="fade">
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>{t.optionsTitle}</Text>
-
-
-                        <View style={styles.optionRow}>
-                            <Text style={styles.optionText}>{t.showNames}</Text>
-                            <Switch
-                                value={showImageNames}
-                                onValueChange={setShowImageNames}
-                                trackColor={{ false: '#767577', true: '#FF508E' }}
-                                thumbColor={showImageNames ? '#fff' : '#f4f3f4'}
-                            />
-                        </View>
-
-                        <View style={styles.optionRow}>
-                            <Text style={styles.optionText}>{t.showCamera}</Text>
-                            <TouchableOpacity
-                                onPress={toggleCamera}
-                                style={[styles.buttonSmall, isCameraOn && styles.buttonActive]}
-                            >
-                                <Text style={styles.buttonText}>{isCameraOn ? t.camOn : t.camOff}</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <Text style={styles.difficultyLabel}>{t.difficulty}</Text>
-                        <View style={styles.difficultyContainer}>
-                            {['easy', 'normal', 'hard'].map((level) => (
-                                <TouchableOpacity
-                                    key={level}
-                                    onPress={() => setDifficulty(level)}
-                                    style={[
-                                        styles.difficultyButton,
-                                        difficulty === level && styles.difficultyButtonActive
-                                    ]}
-                                >
-                                    <Text style={[
-                                        styles.difficultyText,
-                                        difficulty === level && styles.difficultyTextActive
-                                    ]}>
-                                        {(t as any)[`difficulty${level.charAt(0).toUpperCase() + level.slice(1)}`]}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        <TouchableOpacity onPress={handleConfirmPlay} style={styles.confirmButton}>
-                            <Text style={styles.confirmButtonText}>{t.startGame}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={handleBack} style={styles.cancelButton}>
-                            <Text style={styles.cancelText}>{translations[language].creator.cancel}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Results Modal */}
-            <Modal visible={gameState === 'RESULT'} transparent={true} animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.wellDoneText}>{t.wellDone}</Text>
-
-                        <Text style={styles.rateLabel}>{t.rateChallenge}</Text>
-                        <View style={styles.starsContainer}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <TouchableOpacity key={star} onPress={() => handleRate(star)}>
-                                    <Text style={[styles.starIcon, rating >= star && styles.starActive]}>
-                                        {rating >= star ? '★' : '☆'}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        <View style={styles.resultsButtons}>
-                            <TouchableOpacity
-                                onPress={handleRetryDirect}
-                                style={[styles.resultButton, styles.retryBtn]}
-                            >
-                                <Text style={styles.resultButtonText}>{t.retry}</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={handleRetryWithOptions}
-                                style={[styles.resultButton, styles.optionBtn]}
-                            >
-                                <Text style={styles.resultButtonText}>{t.retryWithOptions}</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity
-                            onPress={async () => {
-                                await AdManager.showInterstitial();
-                                handleBack();
-                            }}
-                            style={styles.resultsBackFull}
-                        >
-                            <Text style={styles.resultsBackFullText}>{t.backToMenu}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Banner at the very bottom */}
-            <View style={styles.bannerContainer}>
-                <BannerAd
-                    unitId={AD_UNITS.BANNER}
-                    size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                    requestOptions={{
-                        requestNonPersonalizedAdsOnly: true,
-                    }}
-                />
-            </View>
-
-            {/* Countdown Overlay */}
-            {countdownText && (
-                <View style={styles.countdownOverlay}>
-                    <Animated.Text
-                        style={[
-                            styles.countdownText,
-                            {
-                                opacity: countdownAnim,
-                                transform: [
-                                    {
-                                        scale: countdownAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [0.5, 2.5]
-                                        })
-                                    }
-                                ]
-                            }
-                        ]}
-                    >
-                        {countdownText}
-                    </Animated.Text>
+            {isCameraOn && (
+                <View style={styles.cameraContainer}>
+                    <CameraView style={styles.cameraPreview} facing="front" />
                 </View>
             )}
+        </ScrollView>
+
+        {/* Game Options Modal */}
+        <Modal visible={optionsVisible} transparent={true} animationType="fade">
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>{t.optionsTitle}</Text>
+
+
+                    <View style={styles.optionRow}>
+                        <Text style={styles.optionText}>{t.showNames}</Text>
+                        <Switch
+                            value={showImageNames}
+                            onValueChange={setShowImageNames}
+                            trackColor={{ false: '#767577', true: '#FF508E' }}
+                            thumbColor={showImageNames ? '#fff' : '#f4f3f4'}
+                        />
+                    </View>
+
+                    <View style={styles.optionRow}>
+                        <Text style={styles.optionText}>{t.showCamera}</Text>
+                        <TouchableOpacity
+                            onPress={toggleCamera}
+                            style={[styles.buttonSmall, isCameraOn && styles.buttonActive]}
+                        >
+                            <Text style={styles.buttonText}>{isCameraOn ? t.camOn : t.camOff}</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Text style={styles.difficultyLabel}>{t.difficulty}</Text>
+                    <View style={styles.difficultyContainer}>
+                        {['easy', 'normal', 'hard'].map((level) => (
+                            <TouchableOpacity
+                                key={level}
+                                onPress={() => setDifficulty(level)}
+                                style={[
+                                    styles.difficultyButton,
+                                    difficulty === level && styles.difficultyButtonActive
+                                ]}
+                            >
+                                <Text style={[
+                                    styles.difficultyText,
+                                    difficulty === level && styles.difficultyTextActive
+                                ]}>
+                                    {(t as any)[`difficulty${level.charAt(0).toUpperCase() + level.slice(1)}`]}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    <TouchableOpacity onPress={handleConfirmPlay} style={styles.confirmButton}>
+                        <Text style={styles.confirmButtonText}>{t.startGame}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={handleBack} style={styles.cancelButton}>
+                        <Text style={styles.cancelText}>{translations[language].creator.cancel}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+
+        {/* Results Modal */}
+        <Modal visible={gameState === 'RESULT'} transparent={true} animationType="slide">
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.wellDoneText}>{t.wellDone}</Text>
+
+                    <Text style={styles.rateLabel}>{t.rateChallenge}</Text>
+                    <View style={styles.starsContainer}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <TouchableOpacity key={star} onPress={() => handleRate(star)}>
+                                <Text style={[styles.starIcon, rating >= star && styles.starActive]}>
+                                    {rating >= star ? '★' : '☆'}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    <View style={styles.resultsButtons}>
+                        <TouchableOpacity
+                            onPress={handleRetryDirect}
+                            style={[styles.resultButton, styles.retryBtn]}
+                        >
+                            <Text style={styles.resultButtonText}>{t.retry}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={handleRetryWithOptions}
+                            style={[styles.resultButton, styles.optionBtn]}
+                        >
+                            <Text style={styles.resultButtonText}>{t.retryWithOptions}</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity
+                        onPress={async () => {
+                            await AdManager.showInterstitial();
+                            handleBack();
+                        }}
+                        style={styles.resultsBackFull}
+                    >
+                        <Text style={styles.resultsBackFullText}>{t.backToMenu}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+
+        {/* Banner at the very bottom */}
+        <View style={styles.bannerContainer}>
+            <BannerAd
+                unitId={AD_UNITS.BANNER}
+                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                requestOptions={{
+                    requestNonPersonalizedAdsOnly: true,
+                }}
+            />
         </View>
-    );
+
+        {/* Countdown Overlay */}
+        {countdownText && (
+            <View style={styles.countdownOverlay}>
+                <Animated.Text
+                    style={[
+                        styles.countdownText,
+                        {
+                            opacity: countdownAnim,
+                            transform: [
+                                {
+                                    scale: countdownAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0.5, 2.5]
+                                    })
+                                }
+                            ]
+                        }
+                    ]}
+                >
+                    {countdownText}
+                </Animated.Text>
+            </View>
+        )}
+    </View>
+);
 }
 
 const styles = StyleSheet.create({

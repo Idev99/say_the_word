@@ -1,8 +1,25 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Language } from '../constants/translations';
-import { Alert } from 'react-native';
+import { Language, translations } from '../constants/translations';
+import { Alert, Platform } from 'react-native';
+import * as idb from 'idb-keyval';
+
+// Custom persistence for Web (IndexedDB) to bypass 5MB quota
+const idbStorage = {
+    getItem: async (name: string): Promise<string | null> => {
+        if (Platform.OS !== 'web') return await AsyncStorage.getItem(name);
+        return (await idb.get(name)) || null;
+    },
+    setItem: async (name: string, value: string): Promise<void> => {
+        if (Platform.OS !== 'web') return await AsyncStorage.setItem(name, value);
+        await idb.set(name, value);
+    },
+    removeItem: async (name: string): Promise<void> => {
+        if (Platform.OS !== 'web') return await AsyncStorage.removeItem(name);
+        await idb.del(name);
+    },
+};
 
 export type GameState = 'MENU' | 'PLAYING' | 'RESULT' | 'CREATING';
 
@@ -27,6 +44,7 @@ export interface CommunityChallenge extends LevelData {
   isViral?: boolean; // If this challenge is destined to "buzz"
   hasBuzzNotified?: boolean; // To prevent multiple alerts
   createdAt: number; // timestamp
+  lastNotifiedLevel?: number; // 0 to 15 (representing 1k to 15k views)
 }
 
 interface GameStore {
@@ -686,23 +704,30 @@ export const useGameStore = create<GameStore>()(
         const boostEffect = 1 + (boostLevel * 0.05 * Math.random());
         
         // 4. Calculate Added plays
-        if (Math.random() < baseChance) {
-            const added = Math.floor(Math.random() * (playRange[1] - playRange[0] + 1)) + playRange[0];
-            newPlays += Math.floor(added * boostEffect);
-        }
+        const addedBase = Math.floor(Math.random() * (playRange[1] - playRange[0] + 1)) + playRange[0];
+        const added = Math.floor(addedBase * boostEffect);
         
-        // 5. Random Likes/Fire (tied to plays)
-        if (Math.random() > 0.85) newLikes += 1;
-        if (Math.random() > 0.95) newFire += 1;
+        if (Math.random() < baseChance) {
+            newPlays += added;
+            
+            // 5. Random Likes/Fire (tied to plays) - Only if plays added
+            if (added > 0) {
+                if (Math.random() > 0.85) newLikes += 1;
+                if (Math.random() > 0.95) newFire += 1;
+            }
+        }
       }
 
-      // Check for Buzz Notification (approx 11k views, 200 likes)
-      if (!notified && newPlays >= 11000 && newLikes >= 200) {
-          Alert.alert(
-              "🚀 CHALLENGE EN BUZZ !", 
-              `Félicitations ! Votre challenge "${challenge.name}" est en train de buzzer dans la section Communauté !`
-          );
-          notified = true;
+      // 6. Tiered Buzz Notifications (every 1,000 views up to 15,000)
+      const currentLevel = Math.floor(newPlays / 1000);
+      const prevLevel = challenge.lastNotifiedLevel || 0;
+      
+      if (currentLevel > prevLevel && currentLevel <= 15) {
+          const t = translations[state.language].challenges;
+          const msg = (t as any).buzzMessages?.[currentLevel - 1];
+          if (msg) {
+              Alert.alert("🚀 CHALLENGE EN BUZZ !", msg);
+          }
       }
 
       return {
@@ -710,7 +735,7 @@ export const useGameStore = create<GameStore>()(
         playsCount: newPlays,
         likes: newLikes,
         fire: newFire,
-        hasBuzzNotified: notified
+        lastNotifiedLevel: currentLevel
       };
     });
 
@@ -744,7 +769,7 @@ export const useGameStore = create<GameStore>()(
   }),
 }), {
   name: 'say-the-word-storage',
-  storage: createJSONStorage(() => AsyncStorage),
+  storage: createJSONStorage(() => idbStorage as any), // Use custom IndexedDB/AsyncStorage wrapper
   partialize: (state) => ({
     communityChallenges: state.communityChallenges,
     userChallengeIds: state.userChallengeIds,
