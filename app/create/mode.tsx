@@ -12,14 +12,11 @@ export default function CreatorStep2() {
 
     const handleSelect = (mode: 'RANDOM' | 'CUSTOM') => {
         setCreatorMode(mode);
+        const { fillRandomSlots } = useGameStore.getState();
         if (mode === 'RANDOM') {
-            // Immediately start random game
-            const { loadCustomLevel } = useGameStore.getState();
-            loadCustomLevel();
-            router.push('/game/custom');
-        } else {
-            router.push('/create/design');
+            fillRandomSlots();
         }
+        router.push('/create/design');
     };
 
     return (

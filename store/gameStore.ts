@@ -54,6 +54,7 @@ interface GameStore {
   lastResult: { fire: number } | null;
   retryCount: number;
   lastBoostReset: number;
+  lastGlobalBoostTime: number;
 
   // Actions
   setLanguage: (lang: Language) => void;
@@ -65,6 +66,7 @@ interface GameStore {
   setIntroSpeed: (speed: number) => void;
   setIntroAnimationSpeed: (speed: number) => void;
   boostChallenge: (id: string) => void;
+  setLastGlobalBoostTime: (time: number) => void;
   checkBoostReset: () => void;
 
   endRoundIntro: () => void;
@@ -129,6 +131,8 @@ export const useGameStore = create<GameStore>()(
   lastResult: null,
   retryCount: 0,
   lastBoostReset: Date.now(),
+  lastGlobalBoostTime: 0,
+  setLastGlobalBoostTime: (time: number) => set({ lastGlobalBoostTime: time }),
 
   communityChallenges: [
     {
@@ -483,7 +487,8 @@ export const useGameStore = create<GameStore>()(
     });
 
     return { 
-        communityChallenges: updatedChallenges
+        communityChallenges: updatedChallenges,
+        lastGlobalBoostTime: Date.now()
     };
   }),
 
@@ -609,8 +614,10 @@ export const useGameStore = create<GameStore>()(
           imageNames: state.creatorImageNames,
       };
       
+      const newCommunityChallenges = [newChallenge, ...state.communityChallenges];
+      
       return {
-          communityChallenges: [newChallenge, ...state.communityChallenges],
+          communityChallenges: newCommunityChallenges.slice(0, 25), // Silent pruning to prevent QuotaExceededError
           userChallengeIds: [id, ...state.userChallengeIds],
       };
   }),
@@ -644,19 +651,34 @@ export const useGameStore = create<GameStore>()(
       let newFire = challenge.fire;
       let notified = !!challenge.hasBuzzNotified;
 
-      const ageHours = (now - challenge.createdAt) / (1000 * 60 * 60);
+      const challengeAgeMs = now - challenge.createdAt;
+      const challengeIntervals = Math.floor(challengeAgeMs / intervalMs);
+      // Only process intervals that occurred AFTER the challenge was created
+      const intervalsToProcess = Math.min(intervalsPassed, challengeIntervals);
 
-      for (let i = 0; i < intervalsPassed; i++) {
+      for (let i = 0; i < intervalsToProcess; i++) {
+        // Calculate age at the specific interval moment for accurate growth
+        const ageAtIntervalMs = challengeAgeMs - (intervalsToProcess - 1 - i) * intervalMs;
+        const ageHoursAtInterval = ageAtIntervalMs / (1000 * 60 * 60);
+
         // --- ORGANIC GROWTH LOGIC ---
         
-        // 1. Base Multiplier (Diminishes after 1 hour)
-        let baseChance = ageHours < 1 ? 0.95 : 0.40;
-        let playRange = ageHours < 1 ? [3, 7] : [0, 2]; // Fast start: 3-7 views/min (~180-420/hour)
+        // 1. Base Multiplier (Grace period -> Diminishing returns)
+        let baseChance = 0.95;
+        let playRange = [3, 7];
+
+        if (ageHoursAtInterval < 0.05) { // First 3 minutes: "Grace period"
+            baseChance = 0.6;
+            playRange = [0, 2]; // Max 0-6 views total in 3 mins (Natural)
+        } else if (ageHoursAtInterval > 1) { // After 1 hour: "Stabilization"
+            baseChance = 0.4;
+            playRange = [0, 2];
+        }
         
-        // 2. Viral "Buzz" Multiplier
-        if (challenge.isViral) {
+        // 2. Viral "Buzz" Multiplier (Delayed start)
+        if (challenge.isViral && ageHoursAtInterval > 0.05) {
             baseChance = 1.0; 
-            playRange = ageHours < 5 ? [10, 25] : [2, 5]; // Viral burst
+            playRange = ageHoursAtInterval < 5 ? [10, 25] : [2, 5]; // Viral burst
         }
 
         // 3. Phantom Boost Multiplier (+5% chance/rate per flame, randomized)

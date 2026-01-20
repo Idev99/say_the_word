@@ -591,20 +591,49 @@ function ChallengeCard({ title, icons, onPlay }: { title: string, icons: string[
 
 function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: any, onPlay: () => void, showBoost?: boolean }) {
     const { boostChallenge, language } = useGameStore();
+    const [isBoosting, setIsBoosting] = React.useState(false);
     const t = translations[language].challenges;
     const rt = (t as any).rewards || {};
 
     const handleBoost = async () => {
-        const todayBoosts = challenge.boostsToday || 0;
-        if (todayBoosts >= 5) {
-            Alert.alert("Daily Limit", rt.boostLimit.replace('{n}', '5'));
+        if (isBoosting) return;
+
+        // 1. Global Cooldown Check (3 minutes)
+        const lastGlobalBoost = useGameStore.getState().lastGlobalBoostTime;
+        const now = Date.now();
+        const COOLDOWN_MS = 3 * 60 * 1000;
+
+        if (now - lastGlobalBoost < COOLDOWN_MS) {
+            const remainingMins = Math.ceil((COOLDOWN_MS - (now - lastGlobalBoost)) / 60000);
+            Alert.alert(rt.boostTitle, rt.adNotReady); // Using "Bonus non disponible..."
             return;
         }
 
-        await AdManager.showRewarded(() => {
+        // 2. Connectivity Check
+        try {
+            const response = await fetch('https://www.google.com', { method: 'HEAD', mode: 'no-cors' });
+            if (!response.ok && response.type !== 'opaque') throw new Error();
+        } catch (e) {
+            Alert.alert(rt.boostTitle, rt.noConnection);
+            return;
+        }
+
+        const todayBoosts = challenge.boostsToday || 0;
+        if (todayBoosts >= 5) {
+            Alert.alert(rt.boostLimit.split(' ')[0] || "Limit", rt.boostLimit.replace('{n}', '5'));
+            return;
+        }
+
+        setIsBoosting(true);
+        const success = await AdManager.showRewarded(() => {
             boostChallenge(challenge.id);
-            Alert.alert("Success", rt.boostSuccess);
+            Alert.alert(rt.boostSuccess.split(' ')[0] || "Success", rt.boostSuccess);
         });
+
+        if (!success) {
+            Alert.alert(rt.boostTitle, rt.adNotReady);
+        }
+        setIsBoosting(false);
     };
 
     const timeAgo = (timestamp: number) => {
@@ -625,6 +654,34 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
     while (stackImages.length < 3) stackImages.push('https://via.placeholder.com/150');
 
     const boostLevel = challenge.boostsToday || 0; // Show current daily level
+
+    const lastGlobalBoost = useGameStore(state => state.lastGlobalBoostTime);
+    const COOLDOWN_MS = 3 * 60 * 1000;
+    const [now, setNow] = React.useState(Date.now());
+
+    React.useEffect(() => {
+        const diff = Date.now() - lastGlobalBoost;
+        if (diff < COOLDOWN_MS) {
+            const interval = setInterval(() => {
+                setNow(Date.now());
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [lastGlobalBoost]);
+
+    const isGlobalCooldown = (now - lastGlobalBoost) < COOLDOWN_MS;
+    const isLimitReached = (challenge.boostsToday || 0) >= 5;
+    const isButtonDisabled = isLimitReached || isBoosting || isGlobalCooldown;
+
+    const getRemainingText = () => {
+        if (isGlobalCooldown) {
+            const remaining = Math.max(0, COOLDOWN_MS - (now - lastGlobalBoost));
+            const mins = Math.floor(remaining / 60000);
+            const secs = Math.floor((remaining % 60000) / 1000);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        return rt.boostLimit.replace('{n}', (challenge.boostsToday || 0).toString());
+    };
 
     return (
         <View style={[styles.card, styles.hardShadow]}>
@@ -678,13 +735,13 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
 
                 {showBoost && (
                     <TouchableOpacity
-                        style={[styles.boostButton, (challenge.boostsToday || 0) >= 5 && styles.boostButtonDisabled]}
+                        style={[styles.boostButton, isButtonDisabled && styles.boostButtonDisabled]}
                         onPress={handleBoost}
-                        disabled={(challenge.boostsToday || 0) >= 5}
+                        disabled={isButtonDisabled}
                     >
                         <Ionicons name="flame" size={16} color="black" />
                         <Text style={styles.boostButtonText}>
-                            {rt.boostLimit.replace('{n}', (challenge.boostsToday || 0).toString())}
+                            {isBoosting ? rt.loading : getRemainingText()}
                         </Text>
                     </TouchableOpacity>
                 )}

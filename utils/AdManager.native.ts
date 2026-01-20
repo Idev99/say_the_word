@@ -42,25 +42,53 @@ export const AdManager = {
     loadRewarded: () => {
         rewarded.load();
     },
-    showRewarded: async (onReward: () => void) => {
-        const unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
-            // loaded
-        });
-        const unsubscribeEarned = rewarded.addAdEventListener(
-            RewardedAdEventType.EARNED_REWARD,
-            reward => {
-                console.log('User earned reward of ', reward);
-                onReward();
-            },
-        );
+    showRewarded: (onReward: () => void): Promise<boolean> => {
+        return new Promise((resolve) => {
+            if (!rewarded.loaded) {
+                console.log('AdMob: Rewarded ad not loaded');
+                rewarded.load();
+                resolve(false);
+                return;
+            }
 
-        if (rewarded.loaded) {
-            await rewarded.show();
-            rewarded.load(); // Preload next
-            return true;
-        }
-        rewarded.load();
-        return false;
+            let earned = false;
+            const subs: (() => void)[] = [];
+
+            const cleanUp = () => {
+                subs.forEach(unsub => unsub());
+            };
+
+            subs.push(rewarded.addAdEventListener(RewardedAdEventType.EARNED_REWARD, (reward) => {
+                console.log('AdMob: Reward earned', reward);
+                earned = true;
+            }));
+
+            subs.push(rewarded.addAdEventListener(AdEventType.CLOSED, () => {
+                console.log('AdMob: Ad closed');
+                cleanUp();
+                if (earned) {
+                    onReward();
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+                rewarded.load(); // Preload next
+            }));
+
+            subs.push(rewarded.addAdEventListener(AdEventType.ERROR, (err) => {
+                console.warn('AdMob: Ad error', err);
+                cleanUp();
+                resolve(false);
+                rewarded.load();
+            }));
+
+            rewarded.show().catch(err => {
+                console.error('AdMob: Failed to show ad', err);
+                cleanUp();
+                resolve(false);
+                rewarded.load();
+            });
+        });
     },
     initialize: async () => {
         await mobileAds().initialize();

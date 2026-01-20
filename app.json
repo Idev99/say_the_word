@@ -37,7 +37,13 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "1.9.24"
+            "kotlinVersion": "1.9.24",
+            "extraGradleProperties": [
+              {
+                "name": "AsyncStorage_db_size_in_MB",
+                "value": "50"
+              }
+            ]
           }
         }
       ]
