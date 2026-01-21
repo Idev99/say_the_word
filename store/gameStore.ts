@@ -131,6 +131,7 @@ interface GameStore {
   // Ad Actions
   incrementRetryCount: () => void;
   resetRetryCount: () => void;
+  scheduleFutureNotifications: () => Promise<void>;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -143,7 +144,7 @@ export const useGameStore = create<GameStore>()(
   bpm: 210,
   isPlaying: false,
   isRoundIntro: false,
-  language: 'EN',
+  language: 'FR',
   introSpeed: 1.15,
   introAnimationSpeed: 1.15,
   activeTab: 'featured',
@@ -737,7 +738,7 @@ export const useGameStore = create<GameStore>()(
           const t = translations[state.language].challenges;
           const msg = (t as any).buzzMessages?.[currentLevel - 1];
           if (msg) {
-              const buzzTitle = state.language === 'FR' ? "🚀 CHALLENGE EN BUZZ !" : (state.language === 'ES' ? "🚀 RETO VIRAL !" : "🚀 CHALLENGE BUZZING!");
+              const buzzTitle = (t as any).buzzTitle;
               
               // Internal Alert
               Alert.alert(buzzTitle, msg);
@@ -762,6 +763,71 @@ export const useGameStore = create<GameStore>()(
       lastBoostReset: nextBoostResetVal
     };
   }),
+
+  scheduleFutureNotifications: async () => {
+    const state = get();
+    const { communityChallenges, language } = state;
+    if (Platform.OS === 'web') return;
+
+    // 1. Clear existing to avoid duplicates
+    await NotificationManager.cancelAllScheduledNotifications();
+
+    const t = translations[language].challenges;
+    const buzzMessages = (t as any).buzzMessages || [];
+    const buzzTitle = (t as any).buzzTitle;
+
+    communityChallenges.forEach(challenge => {
+      // Calculate estimated growth rate per 10s
+      const now = Date.now();
+      const ageHours = (now - challenge.createdAt) / (1000 * 60 * 60);
+      
+      let baseChance = 0.95;
+      let avgAdded = 5;
+
+      if (ageHours < 0.05) { 
+          baseChance = 0.6;
+          avgAdded = 1;
+      } else if (ageHours > 1) { 
+          baseChance = 0.4;
+          avgAdded = 1;
+      }
+
+      if (challenge.isViral && ageHours > 0.05) {
+          baseChance = 1.0;
+          avgAdded = ageHours < 5 ? 17.5 : 3.5;
+      }
+
+      const boostLevel = challenge.boostLevel || 0;
+      const boostEffect = 1 + (boostLevel * 0.025); // Conservative boost estimate
+      
+      const viewsPerInterval = baseChance * avgAdded * boostEffect;
+      const intervalMs = 10000;
+
+      if (viewsPerInterval <= 0) return;
+
+      // Plan next 3 milestones
+      let plannedCount = 0;
+      for (let tier = 1; tier <= 15; tier++) {
+          const milestone = tier * 1000;
+          if (milestone > challenge.playsCount && buzzMessages[tier - 1]) {
+              const needed = milestone - challenge.playsCount;
+              const intervalsNeeded = needed / viewsPerInterval;
+              const secondsFromNow = Math.floor((intervalsNeeded * intervalMs) / 1000);
+
+              // Max 7 days in future
+              if (secondsFromNow > 0 && secondsFromNow < 7 * 24 * 3600 && plannedCount < 3) {
+                  NotificationManager.scheduleFutureBuzz(
+                      buzzTitle,
+                      buzzMessages[tier - 1],
+                      secondsFromNow,
+                      `buzz-${challenge.id}-${tier}`
+                  );
+                  plannedCount++;
+              }
+          }
+      }
+    });
+  },
 
   loadCustomLevel: () => set((state) => {
     // Generate Level Data from Creator State

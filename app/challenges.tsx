@@ -310,26 +310,26 @@ const MOCK_VIDEOS = [
     {
         id: '1',
         title: 'Nico joue au jeu 😂',
-        tiktokId: '7585956961473039638',
-        url: 'https://www.tiktok.com/@nico_tine84/video/7585956961473039638'
+        tiktokId: '7597756310767095062',
+        url: 'https://www.tiktok.com/@hydoradorad/video/7597756310767095062'
     },
     {
         id: '3',
         title: 'Pomme Tarte Maison Mouche 😂',
-        tiktokId: '7588712989033811222',
-        url: 'https://www.tiktok.com/@le.gamer.du.80670/video/7588712989033811222'
+        tiktokId: '7597755508094668054',
+        url: 'https://www.tiktok.com/@hydoradorad/video/7597755508094668054'
     },
     {
         id: '4',
         title: 'Cendrillon mozzarella 👸🏼⛱️',
-        tiktokId: '7585027159194995990',
-        url: 'https://www.tiktok.com/@berkalinho/video/7585027159194995990'
+        tiktokId: '7597754379143351574',
+        url: 'https://www.tiktok.com/@hydoradorad/video/7597754379143351574'
     },
     {
         id: '2',
         title: 'Prank 😲',
-        tiktokId: '7589032517588634902',
-        url: 'https://www.tiktok.com/@narinemucus/video/7589032517588634902'
+        tiktokId: '7597754142555245846',
+        url: 'https://www.tiktok.com/@hydoradorad/video/7597754142555245846'
     }
 ];
 
@@ -674,8 +674,8 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
 
         if (!AdManager.isRewardedLoaded()) {
             Alert.alert(
-                language === 'FR' ? "Boost en attente" : "Boost Pending",
-                language === 'FR' ? "La pub se lancera dès qu'elle sera prête (max 1 min). Tu peux continuer à naviguer !" : "The ad will launch as soon as it's ready (max 1 min). You can continue browsing!"
+                rt.pendingBoostTitle,
+                rt.pendingBoostDesc
             );
         }
     };
@@ -683,9 +683,7 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
     const timeAgo = (timestamp: number) => {
         const seconds = Math.floor((Date.now() - timestamp) / 1000);
         const days = Math.floor(seconds / (3600 * 24));
-        if (language === 'FR') return `Il y a ${days} j`;
-        if (language === 'ES') return `Hace ${days} d`;
-        return `${days} days ago`;
+        return (t as any).timeAgo.replace('{n}', days.toString());
     };
 
     const stackImages = [];

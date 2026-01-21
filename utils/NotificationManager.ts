@@ -46,6 +46,29 @@ export const NotificationManager = {
         });
     },
 
+    scheduleFutureBuzz: async (title: string, body: string, secondsFromNow: number, identifier?: string) => {
+        if (Platform.OS === 'web' || secondsFromNow <= 0) return;
+
+        await Notifications.scheduleNotificationAsync({
+            identifier: identifier,
+            content: {
+                title: title,
+                body: body,
+                sound: true,
+                priority: Notifications.AndroidNotificationPriority.MAX,
+                categoryIdentifier: 'buzz',
+            },
+            trigger: {
+                seconds: secondsFromNow,
+            },
+        });
+    },
+
+    cancelAllScheduledNotifications: async () => {
+        if (Platform.OS === 'web') return;
+        await Notifications.cancelAllScheduledNotificationsAsync();
+    },
+
     setupHandlers: () => {
         if (Platform.OS === 'web') return;
 

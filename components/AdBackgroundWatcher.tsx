@@ -32,7 +32,6 @@ export default function AdBackgroundWatcher() {
                 console.log("[AdWatcher] Timeout reached (1 min). Cancelling.");
                 setPendingBoost(false, null);
                 if (intervalRef.current) clearInterval(intervalRef.current);
-                Alert.alert(t.boostTitle || "Boost", t.adNotReady || "Ad not ready, try again later.");
                 return;
             }
 
