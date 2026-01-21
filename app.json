@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "say_the_word",
-    "slug": "say_the_word",
+    "name": "say_the_word_on_beat",
+    "slug": "say_the_word_on_beat",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -56,9 +56,13 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "26de7a1b-320f-4ac1-b4b2-21145bc1e161"
+        "projectId": "2524e2a1-e1bc-4beb-8692-286e15d6a1c5"
       }
-    }
+    },
+    "owner": "hydra45"
   }
 }
