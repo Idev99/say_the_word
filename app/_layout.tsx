@@ -5,6 +5,7 @@ import LanguagePicker from '../components/LanguagePicker';
 import BackgroundDecor from '../components/BackgroundDecor';
 
 import { AdManager } from '../utils/AdManager';
+import { NotificationManager } from '../utils/NotificationManager';
 import React, { useEffect } from 'react';
 
 const PAPER_TEXTURE = require('../assets/paper-texture.jpg');
@@ -12,6 +13,8 @@ const PAPER_TEXTURE = require('../assets/paper-texture.jpg');
 export default function RootLayout() {
     useEffect(() => {
         AdManager.initialize();
+        NotificationManager.setupHandlers();
+        NotificationManager.initialize();
     }, []);
 
     return (

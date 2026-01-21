@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language, translations } from '../constants/translations';
 import { Alert, Platform } from 'react-native';
 import * as idb from 'idb-keyval';
+import { NotificationManager } from '../utils/NotificationManager';
 
 // Custom persistence for Web (IndexedDB) to bypass 5MB quota
 const idbStorage = {
@@ -726,7 +727,13 @@ export const useGameStore = create<GameStore>()(
           const t = translations[state.language].challenges;
           const msg = (t as any).buzzMessages?.[currentLevel - 1];
           if (msg) {
-              Alert.alert("🚀 CHALLENGE EN BUZZ !", msg);
+              const buzzTitle = state.language === 'FR' ? "🚀 CHALLENGE EN BUZZ !" : (state.language === 'ES' ? "🚀 RETO VIRAL !" : "🚀 CHALLENGE BUZZING!");
+              
+              // Internal Alert
+              Alert.alert(buzzTitle, msg);
+
+              // Native Notification
+              NotificationManager.sendImmediateBuzz(buzzTitle, msg);
           }
       }
 
