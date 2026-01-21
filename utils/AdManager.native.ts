@@ -51,11 +51,28 @@ export const AdManager = {
         return rewarded.loaded;
     },
     loadRewarded: () => {
-        if (rewarded.loaded || isRewardedLoading) return;
+        if (rewarded.loaded) return;
+        
+        // Safety: If it's been "loading" for too long (stuck), force reset
+        if (isRewardedLoading) {
+             // You could add a timestamp check here, or just trust the new timeout below
+             // For now, we'll let the existing logic permit one overlapping call if needed, 
+             // but let's just rely on the timeout added below.
+        }
+        
+        if (isRewardedLoading) return;
 
         isRewardedLoading = true;
         console.log('AdMob: Loading Rewarded Ad...');
         rewarded.load();
+        
+        // Failsafe: Reset flag after 15s if stuck (no LOADED or ERROR event fired)
+        setTimeout(() => {
+            if (isRewardedLoading) {
+                console.log('AdMob: Force resetting stuck loading flag');
+                isRewardedLoading = false;
+            }
+        }, 15000);
     },
     showRewarded: (onReward: () => void): Promise<boolean> => {
         return new Promise((resolve) => {

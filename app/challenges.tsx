@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions, Platform, Linking, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView, Modal, Animated, Dimensions, Platform, Linking, Alert, ActivityIndicator, AppState } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../constants/translations';
@@ -61,10 +61,30 @@ export default function ChallengesScreen() {
     const { language, communityChallenges, loadLevel, activeTab, setActiveTab, isLoggedIn, refreshEngagement } = useGameStore();
     const t = translations[language].challenges;
 
-    // Aggressive Preload on Mount
+    // Aggressive Preload & Keep Alive
     React.useEffect(() => {
-        AdManager.loadRewarded();
+        const loadAds = () => {
+            // Safety check: triggers a load if not already loaded/loading
+            AdManager.loadRewarded();
+        };
+
+        loadAds(); // Initial load
         refreshEngagement();
+
+        // Check every 15 seconds to ensure we always have an ad ready
+        const interval = setInterval(loadAds, 15000);
+
+        // AppState Listener: Trigger check immediately when coming back from background
+        const subscription = AppState.addEventListener('change', (nextAppState) => {
+            if (nextAppState === 'active') {
+                loadAds();
+            }
+        });
+
+        return () => {
+            clearInterval(interval);
+            subscription.remove();
+        };
     }, []);
 
     const [sortBy, setSortBy] = React.useState<'plays' | 'likes' | 'newest'>('plays');
