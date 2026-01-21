@@ -288,11 +288,15 @@ const MOCK_LEVELS: Record<string, LevelData> = {
     },
     'fortnite': {
         id: 'fortnite',
-        name: 'Fortnite Pro Pack',
+        name: 'Fortnite',
         rounds: 5,
-        images: [require('../../assets/images/fortnite.png')],
+        images: [require('../../assets/images/fortnite.png'),
+        require('../../assets/images/minecraft.png'),
+        require('../../assets/images/lol.png'),],
         imageNames: {
             [require('../../assets/images/fortnite.png')]: "fortnite",
+            [require('../../assets/images/minecraft.png')]: "minecraft",
+            [require('../../assets/images/lol.png')]: "lol",
         }
     },
     'lol': {
