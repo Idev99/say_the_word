@@ -51,6 +51,9 @@ const ICON_MAP: Record<string, any> = {
     mozzarella: require('../assets/images/mozzarella.png'),
     cinderella: require('../assets/images/cinderella.png'),
     umbrella: require('../assets/images/umbrella.png'),
+    fortnite: require('../assets/images/fortnite.png'),
+    lol: require('../assets/images/lol.png'),
+    minecraft: require('../assets/images/minecraft.png'),
 };
 
 export default function ChallengesScreen() {
@@ -135,6 +138,11 @@ export default function ChallengesScreen() {
                                 title={t.list.pomme}
                                 icons={['apple', 'pie', 'horse', 'fly']}
                                 onPlay={() => router.push('/game/pomme')}
+                            />
+                            <ChallengeCard
+                                title={t.list.fortnite}
+                                icons={['minecraft', 'lol', 'fortnite']}
+                                onPlay={() => router.push('/game/fortnite')}
                             />
                             <ChallengeCard
                                 title={t.list.influencers}

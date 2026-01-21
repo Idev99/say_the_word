@@ -285,6 +285,33 @@ const MOCK_LEVELS: Record<string, LevelData> = {
             [require('../../assets/images/chaussette.png')]: "chaussette",
             [require('../../assets/images/coussin.png')]: "coussin",
         }
+    },
+    'fortnite': {
+        id: 'fortnite',
+        name: 'Fortnite Pro Pack',
+        rounds: 5,
+        images: [require('../../assets/images/fortnite.png')],
+        imageNames: {
+            [require('../../assets/images/fortnite.png')]: "fortnite",
+        }
+    },
+    'lol': {
+        id: 'lol',
+        name: 'League of Legends',
+        rounds: 5,
+        images: [require('../../assets/images/lol.png')],
+        imageNames: {
+            [require('../../assets/images/lol.png')]: "lol",
+        }
+    },
+    'minecraft': {
+        id: 'minecraft',
+        name: 'Minecraft World',
+        rounds: 5,
+        images: [require('../../assets/images/minecraft.png')],
+        imageNames: {
+            [require('../../assets/images/minecraft.png')]: "minecraft",
+        }
     }
 };
 

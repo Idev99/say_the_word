@@ -39,6 +39,9 @@ export const translations = {
                 "chaussette": "Socks & Pillows (Hard)",
                 "pomme": "Apple Pie Horse Fly",
                 "mozzarella": "Mozzarella Cinderella Umbrella",
+                "fortnite": "Fortnite",
+                "lol": "League of Legends",
+                "minecraft": "Minecraft",
             },
             sort: {
                 plays: "Most Played",
@@ -233,6 +236,9 @@ export const translations = {
                 "chaussette": "Chaussette Coussin (Dure)",
                 "pomme": "Pomme Tarte Cheval Mouche",
                 "mozzarella": "Mozarella Cendrillon Parapluie",
+                "fortnite": "Minecraft Fortnite LoL",
+                "lol": "League of Legends",
+                "minecraft": "Minecraft",
             },
             sort: {
                 plays: "Les plus joués",
@@ -426,6 +432,9 @@ export const translations = {
                 "chaussette": "Calcetín Cojín (Duro)",
                 "pomme": "Manzana Tarta Caballo Mosca",
                 "mozzarella": "Mozzarella Cenicienta Paraguas",
+                "fortnite": "Fortnite",
+                "lol": "LoL",
+                "minecraft": "Minecraft",
             },
             sort: {
                 plays: "Más Jugados",
