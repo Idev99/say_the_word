@@ -410,11 +410,18 @@ export default function GameScreen() {
             ]).start();
 
             // Play sound with crescendo
-            // playSound('beat', step.rate, step.volume);
+            if (step.sound) {
+                playSound(step.sound as any, step.rate, step.volume);
+            } else {
+                playSound('beat', step.rate, step.volume);
+            }
+
+            // Wait for this step to finish before next
+            await new Promise(resolve => setTimeout(resolve, 800));
         }
 
         // Wait for 1 second (approx)
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         setCountdownText(null);
         setRating(0); // Reset rating for new attempt
