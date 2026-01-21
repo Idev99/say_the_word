@@ -58,7 +58,9 @@ export default function ChallengesScreen() {
     const { language, communityChallenges, loadLevel, activeTab, setActiveTab, isLoggedIn, refreshEngagement } = useGameStore();
     const t = translations[language].challenges;
 
+    // Aggressive Preload on Mount
     React.useEffect(() => {
+        AdManager.loadRewarded();
         refreshEngagement();
     }, []);
 
@@ -608,14 +610,16 @@ function ChallengeCard({ title, icons, onPlay }: { title: string, icons: string[
 }
 
 function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: any, onPlay: () => void, showBoost?: boolean }) {
-    const { boostChallenge, language } = useGameStore();
+    const { boostChallenge, language, isPendingBoost, pendingBoostChallengeId, setPendingBoost } = useGameStore();
     const [isBoosting, setIsBoosting] = React.useState(false);
     const [isAdLoading, setIsAdLoading] = React.useState(false);
     const t = translations[language].challenges;
     const rt = (t as any).rewards || {};
 
+    const isThisPending = isPendingBoost && pendingBoostChallengeId === challenge.id;
+
     const handleBoost = async () => {
-        if (isAdLoading || isBoosting) return;
+        if (isAdLoading || isBoosting || isPendingBoost) return;
 
         // 1. Global Cooldown Check (3 minutes)
         const lastGlobalBoost = useGameStore.getState().lastGlobalBoostTime;
@@ -643,35 +647,37 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
             return;
         }
 
+        // 3. Instant show if ready
+        if (AdManager.isRewardedLoaded()) {
+            setIsBoosting(true);
+            const success = await AdManager.showRewarded(() => {
+                boostChallenge(challenge.id);
+            });
+            setIsBoosting(false);
+            if (!success) Alert.alert(rt.boostTitle, rt.adNotReady);
+            return;
+        }
+
+        // 4. Background Loading (up to 1 min)
         setIsAdLoading(true);
-        AdManager.loadRewarded(); // Ensure we are trying to load
+        AdManager.loadRewarded();
+        setPendingBoost(true, challenge.id);
 
-        // 3. Wait for Ad for up to 6 seconds
+        // Optional short wait (6s)
         let attempts = 0;
-        const maxAttempts = 12; // 12 * 500ms = 6s
-
-        while (!AdManager.isRewardedLoaded() && attempts < maxAttempts) {
+        while (!AdManager.isRewardedLoaded() && attempts < 12) {
             await new Promise(resolve => setTimeout(resolve, 500));
             attempts++;
         }
 
-        if (!AdManager.isRewardedLoaded()) {
-            setIsAdLoading(false);
-            Alert.alert(rt.boostTitle, rt.adNotReady);
-            return;
-        }
-
-        // 4. Show Ad
         setIsAdLoading(false);
-        setIsBoosting(true);
-        const success = await AdManager.showRewarded(() => {
-            boostChallenge(challenge.id);
-        });
 
-        if (!success) {
-            Alert.alert(rt.boostTitle, rt.adNotReady);
+        if (!AdManager.isRewardedLoaded()) {
+            Alert.alert(
+                language === 'FR' ? "Boost en attente" : "Boost Pending",
+                language === 'FR' ? "La pub se lancera dès qu'elle sera prête (max 1 min). Tu peux continuer à naviguer !" : "The ad will launch as soon as it's ready (max 1 min). You can continue browsing!"
+            );
         }
-        setIsBoosting(false);
     };
 
     const timeAgo = (timestamp: number) => {
@@ -773,12 +779,12 @@ function CommunityChallengeCard({ challenge, onPlay, showBoost }: { challenge: a
 
                 {showBoost && (
                     <TouchableOpacity
-                        style={[styles.boostButton, isButtonDisabled && styles.boostButtonDisabled]}
+                        style={[styles.boostButton, (isButtonDisabled && !isThisPending) && styles.boostButtonDisabled]}
                         onPress={handleBoost}
-                        disabled={isButtonDisabled}
+                        disabled={isButtonDisabled || isThisPending}
                     >
                         <Ionicons name="flame" size={16} color="black" />
-                        {isAdLoading ? (
+                        {isAdLoading || isThisPending ? (
                             <ActivityIndicator size="small" color="black" style={{ marginLeft: 5 }} />
                         ) : (
                             <Text style={styles.boostButtonText}>

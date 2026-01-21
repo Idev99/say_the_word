@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ImageBackground, StyleSheet, View } from 'react-native';
 import LanguagePicker from '../components/LanguagePicker';
 import BackgroundDecor from '../components/BackgroundDecor';
+import AdBackgroundWatcher from '../components/AdBackgroundWatcher';
 
 import { AdManager } from '../utils/AdManager';
 import { NotificationManager } from '../utils/NotificationManager';
@@ -21,6 +22,7 @@ export default function RootLayout() {
         <ImageBackground source={PAPER_TEXTURE} style={styles.background} resizeMode="cover">
             <StatusBar style="auto" />
             <BackgroundDecor />
+            <AdBackgroundWatcher />
             <View style={styles.pickerContainer}>
                 <LanguagePicker />
             </View>

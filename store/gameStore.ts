@@ -117,6 +117,11 @@ interface GameStore {
   resetCreator: () => void;
   refreshEngagement: () => void;
   
+  // Pending Boost State
+  isPendingBoost: boolean;
+  pendingBoostChallengeId: string | null;
+  setPendingBoost: (isPending: boolean, challengeId: string | null) => void;
+  
   // Custom Game Start
   loadCustomLevel: () => void;
   
@@ -388,6 +393,11 @@ export const useGameStore = create<GameStore>()(
   setActiveTab: (tab) => set({ activeTab: tab }),
   
   setLanguage: (lang) => set({ language: lang }),
+  
+  isPendingBoost: false,
+  pendingBoostChallengeId: null,
+  setPendingBoost: (isPending, challengeId) => set({ isPendingBoost: isPending, pendingBoostChallengeId: challengeId }),
+
   setGameState: (state) => set({ gameState: state }),
   setShowImageNames: (show) => set({ showImageNames: show }),
   loadLevel: (level) => set((state) => {

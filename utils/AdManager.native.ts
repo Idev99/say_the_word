@@ -23,18 +23,26 @@ const rewarded = RewardedAd.createForAdRequest(AD_UNITS.REWARDED, {
     requestNonPersonalizedAdsOnly: true,
 });
 
+let isRewardedLoading = false;
+let rewardedRetryCount = 0;
+let isInterstitialLoading = false;
+let interstitialRetryCount = 0;
+
 export const AdManager = {
     // Interstitial Logic
     loadInterstitial: () => {
+        if (interstitial.loaded || isInterstitialLoading) return;
+        
+        isInterstitialLoading = true;
+        console.log('AdMob: Loading Interstitial...');
         interstitial.load();
     },
     showInterstitial: async () => {
         if (interstitial.loaded) {
             await interstitial.show();
-            interstitial.load(); // Preload next
             return true;
         }
-        interstitial.load(); // Try loading if not ready
+        AdManager.loadInterstitial();
         return false;
     },
 
@@ -43,10 +51,11 @@ export const AdManager = {
         return rewarded.loaded;
     },
     loadRewarded: () => {
-        if (!rewarded.loaded) {
-            console.log('AdMob: Loading Rewarded Ad...');
-            rewarded.load();
-        }
+        if (rewarded.loaded || isRewardedLoading) return;
+
+        isRewardedLoading = true;
+        console.log('AdMob: Loading Rewarded Ad...');
+        rewarded.load();
     },
     showRewarded: (onReward: () => void): Promise<boolean> => {
         return new Promise((resolve) => {
@@ -102,6 +111,36 @@ export const AdManager = {
     initialize: async () => {
         await mobileAds().initialize();
         console.log('AdMob Initialized');
+
+        // Rewarded Listeners
+        rewarded.addAdEventListener(AdEventType.LOADED, () => {
+            console.log('AdMob: Rewarded Loaded');
+            isRewardedLoading = false;
+            rewardedRetryCount = 0;
+        });
+        rewarded.addAdEventListener(AdEventType.ERROR, (err) => {
+            console.log('AdMob: Rewarded Load Error', err);
+            isRewardedLoading = false;
+            rewardedRetryCount++;
+            const delay = Math.min(60000, 5000 * Math.pow(2, rewardedRetryCount - 1));
+            console.log(`AdMob: Retrying Rewarded load in ${delay / 1000}s...`);
+            setTimeout(() => AdManager.loadRewarded(), delay);
+        });
+
+        // Interstitial Listeners
+        interstitial.addAdEventListener(AdEventType.LOADED, () => {
+            console.log('AdMob: Interstitial Loaded');
+            isInterstitialLoading = false;
+            interstitialRetryCount = 0;
+        });
+        interstitial.addAdEventListener(AdEventType.ERROR, (err) => {
+            console.log('AdMob: Interstitial Load Error', err.message);
+            isInterstitialLoading = false;
+            interstitialRetryCount++;
+            const delay = Math.min(60000, 5000 * Math.pow(2, interstitialRetryCount - 1));
+            console.log(`AdMob: Retrying Interstitial load in ${delay / 1000}s...`);
+            setTimeout(() => AdManager.loadInterstitial(), delay);
+        });
 
         // Initial loads
         AdManager.loadInterstitial();

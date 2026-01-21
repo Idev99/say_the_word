@@ -309,6 +309,9 @@ export default function GameScreen() {
     useBeatController();
 
     useEffect(() => {
+        AdManager.loadInterstitial();
+        AdManager.loadRewarded();
+
         if (id === 'custom') {
             // Already loaded via loadCustomLevel() in the creator screens
         } else if (typeof id === 'string' && MOCK_LEVELS[id]) {
