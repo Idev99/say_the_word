@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore, LevelData } from '../../store/gameStore';
 import { useBeatController } from '../../hooks/useBeatController';
 import { translations } from '../../constants/translations';
-import { useSoundEffects } from '../../hooks/useSoundEffects';
+import { useSoundEffects, SOUNDS_CONFIG } from '../../hooks/useSoundEffects';
 import GridSystem from '../../components/game/GridSystem';
 import { useEffect, useState, useRef } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';

@@ -1,6 +1,6 @@
 import { Audio } from 'expo-av';
 
-const SOUNDS_CONFIG = {
+export const SOUNDS_CONFIG = {
   monmagaietsifflet2: require('../assets/sounds/monmagaietsifflet2.mp3'),
   siffletgo: require('../assets/sounds/siffletgo.mp3'),
   beat: { uri: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg' },

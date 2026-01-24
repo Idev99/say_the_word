@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Say the Word on Beat FR EN ES",
+    "name": "Say The Word Jeu Rythme & Mots",
     "slug": "say_the_word_on_beat",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,10 +17,16 @@
     },
     "android": {
       "package": "com.idev99.saytheword",
+      "versionCode": 10,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "CAMERA",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
       "notification": {
         "icon": "./assets/notification-icon.png",
         "color": "#FFD700"
@@ -42,6 +48,8 @@
         {
           "android": {
             "kotlinVersion": "1.9.24",
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 35,
             "extraGradleProperties": [
               {
                 "name": "AsyncStorage_db_size_in_MB",
